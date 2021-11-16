@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=battle_of_chains
+POSTGRES_USER=qUSyXgIyKuvLUqTchpmeobmFnXBlOmmN
+POSTGRES_PASSWORD=pyWDZJWVtHkeQyOtx0j7jhZAL11ywz9t53n9aKhx9nNBVoaoX2am75N59lKKn1Rn
