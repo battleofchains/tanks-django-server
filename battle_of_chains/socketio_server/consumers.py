@@ -5,40 +5,40 @@ sio = socketio.AsyncServer(async_mode='asgi')
 app = socketio.ASGIApp(sio)
 
 
-class MyCustomNamespace(socketio.AsyncNamespace):
+class ChatNamespace(socketio.AsyncNamespace):
     async def on_connect(self, sid, environ):
         user = environ.get('asgi.scope', {}).get('user')
-        print("sid", sid)
-        print(user)
         if user.is_anonymous:
             await self.disconnect(sid)
         else:
-            print(self.server.manager.rooms)
+            await self.emit('info', {'data': 'Connected'}, room=sid)
+            from .async_db_calls import get_a_room, add_user_to_room, get_room_user_names
+            room = await get_a_room()
             async with self.session(sid) as session:
                 session['user'] = user
-            await self.emit('my response', {'data': 'Connected', 'count': 0}, room=sid)
+                session['room'] = room
+            self.enter_room(sid, room.name)
+            await add_user_to_room(room, user)
+            users = await get_room_user_names(room)
+            await self.emit('info',
+                            {'data': f'{sid} Entered room: {room.name}', 'users': users},
+                            room=room.name)
 
     async def on_disconnect(self, sid):
+        async with self.session(sid) as session:
+            room = session['room']
+            user = session['user']
+        self.leave_room(sid, room.name)
+        from .async_db_calls import remove_user_from_room
+        await remove_user_from_room(room, user)
+        await self.emit('info', {'data': f'{sid} Left room: {room.name}'}, room=room.name)
         await self.disconnect(sid)
 
-    async def on_broadcast_event(self, sid, data):
-        await self.emit('my response', {'data': data['data']})
-
-    async def on_join(self, sid, message):
-        self.enter_room(sid, message['room'])
-        print(self.server.manager.rooms['/test'][message['room']])
-        await self.emit('my response', {'data': 'Entered room: ' + message['room']}, room=sid)
-
-    async def on_leave(self, sid, message):
-        self.leave_room(sid, message['room'])
-        await self.emit('my response', {'data': 'Left room: ' + message['room']}, room=sid)
-
-    async def on_close_room(self, sid, message):
-        await self.emit('my response', {'data': 'Room ' + message['room'] + ' is closing.'}, room=message['room'])
-        await self.close_room(message['room'])
+    async def on_broadcast_event(self, sid, message):
+        await self.emit('message', {'data': message['data']})
 
     async def on_room_event(self, sid, message):
-        await self.emit('my response', {'data': message['data']}, room=message['room'])
+        await self.emit('message', {'data': message['data']}, room=message['room'])
 
 
-sio.register_namespace(MyCustomNamespace('/test'))
+sio.register_namespace(ChatNamespace('/chat'))

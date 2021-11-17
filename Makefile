@@ -20,3 +20,12 @@ down:
 
 create_user:
 	$(MANAGE) createsuperuser
+
+shell:
+	$(MANAGE) shell_plus
+
+makemigrations:
+	$(MANAGE) makemigrations
+
+migrate:
+	$(MANAGE) migrate
