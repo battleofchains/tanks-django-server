@@ -8,37 +8,21 @@
         $(document).ready(function(){
             let namespace = '/chat';
             const socket = io('ws://' + document.domain + ':' + location.port + namespace, {transports: ['websocket']});
-            socket.on('connect', function() {
-                socket.emit('my event', {data: 'I\'m connected!'});
+            socket.on('joined', function(msg) {
+                console.log(msg);
             });
             socket.on('disconnect', function() {
                 $('#log').append('<br>Disconnected');
             });
             socket.on('info', function(msg) {
-                $('#log').append('<br>Received: ' + msg.data + msg.users);
+              console.log(msg);
+                $('#log').append('<br>Received: ' + msg.data);
             });
-            // event handler for server sent data
-            // the data is displayed in the "Received" section of the page
-            // handlers for the different forms in the page
-            // these send data to the server in a variety of ways
-            $('form#broadcast').submit(function(event) {
-                socket.emit('broadcast_event', {data: $('#broadcast_data').val()});
-                return false;
-            });
-            $('form#join').submit(function(event) {
-                socket.emit('join', {room: $('#join_room').val()});
-                return false;
-            });
-            $('form#leave').submit(function(event) {
-                socket.emit('leave', {room: $('#leave_room').val()});
-                return false;
+            socket.on('room_message', function (msg) {
+              $('#chat').append('<br> ' + msg.from + ': ' + msg.text);
             });
             $('form#send_room').submit(function(event) {
-                socket.emit('room_event', {room: $('#room_name').val(), data: $('#room_data').val()});
-                return false;
-            });
-            $('form#close').submit(function(event) {
-                socket.emit('close_room', {room: $('#close_room').val()});
+                socket.emit('room_message', {text: $('#room_data').val()});
                 return false;
             });
             $('form#disconnect').submit(function(event) {
@@ -51,30 +35,16 @@
 <body>
     <h1>python-socketio test</h1>
     <h2>Send:</h2>
-    <form id="broadcast" method="POST" action='#'>{% csrf_token %}
-        <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
-        <input type="submit" value="Broadcast">
-    </form>
-    <form id="join" method="POST" action='#'>{% csrf_token %}
-        <input type="text" name="join_room" id="join_room" placeholder="Room Name">
-        <input type="submit" value="Join Room">
-    </form>
-    <form id="leave" method="POST" action='#'>{% csrf_token %}
-        <input type="text" name="leave_room" id="leave_room" placeholder="Room Name">
-        <input type="submit" value="Leave Room">
-    </form>
     <form id="send_room" method="POST" action='#'>{% csrf_token %}
-        <input type="text" name="room_name" id="room_name" placeholder="Room Name">
         <input type="text" name="room_data" id="room_data" placeholder="Message">
         <input type="submit" value="Send to Room">
-    </form>
-    <form id="close" method="POST" action="#">{% csrf_token %}
-        <input type="text" name="close_room" id="close_room" placeholder="Room Name">
-        <input type="submit" value="Close Room">
     </form>
     <form id="disconnect" method="POST" action="#">{% csrf_token %}
         <input type="submit" value="Disconnect">
     </form>
+    <h2>Chat:</h2>
+    <div><p id="chat"></p></div>
+    <br>
     <h2>Receive:</h2>
     <div><p id="log"></p></div>
 </body>
