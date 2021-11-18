@@ -8,3 +8,6 @@ class Room(models.Model):
     @property
     def name(self):
         return f"room_{self.pk}"
+
+    def __str__(self):
+        return self.name
