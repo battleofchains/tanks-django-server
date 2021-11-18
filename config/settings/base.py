@@ -78,11 +78,14 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
+    "colorful",
 ]
 
 LOCAL_APPS = [
     "battle_of_chains.users.apps.UsersConfig",
     "battle_of_chains.socketio_server.apps.SocketioConfig",
+    "battle_of_chains.battle.apps.BattleConfig",
+    "battle_of_chains.blockchain.apps.BlockchainConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
