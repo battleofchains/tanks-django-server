@@ -31,4 +31,4 @@ migrate:
 	$(MANAGE) migrate
 
 load_fixtures:
-	$(MANAGE) loaddata tank_types weapon_types maps --settings=config.settings.local
+	$(MANAGE) loaddata tank_types projectile_types maps --settings=config.settings.local

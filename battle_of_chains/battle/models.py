@@ -1,9 +1,14 @@
 from colorful.fields import RGBColorField
+from django.core.validators import MaxValueValidator
 from django.db import models
 
 
 def upload_maps_path(instance, filename):
     return f'maps/{instance.name}/{filename}'
+
+
+def upload_tank_path(instance, filename):
+    return f'tanks/{instance.pk}/{filename}'
 
 
 class Map(models.Model):
@@ -13,6 +18,11 @@ class Map(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BattleType(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+    players_number = models.PositiveSmallIntegerField()
 
 
 class Battle(models.Model):
@@ -33,6 +43,7 @@ class Battle(models.Model):
     status = models.CharField(choices=STATUS.CHOICES, max_length=10)
     players = models.ManyToManyField('users.User', related_name='battles')
     winner = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True)
+    type = models.ForeignKey(BattleType, on_delete=models.CASCADE, related_name='battles')
 
     def __str__(self):
         return f'Battle {self.pk}'
@@ -49,15 +60,18 @@ class Squad(models.Model):
 class TankType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     hp_step = models.PositiveSmallIntegerField(default=100)
-    max_weapons = models.PositiveSmallIntegerField(default=1)
+    max_projectiles = models.PositiveSmallIntegerField(default=1)
     max_equipment = models.PositiveSmallIntegerField(default=1)
     action_points_default = models.PositiveIntegerField(default=100)
     moving_points_default = models.PositiveIntegerField(default=100)
-    damage_bonus_default = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus default, %')
-    critical_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance default, %")
+    damage_bonus_default = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus default, %',
+                                                            validators=[MaxValueValidator(100)])
+    critical_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance default, %",
+                                                               validators=[MaxValueValidator(100)])
     overlook_default = models.PositiveSmallIntegerField(default=3, verbose_name='Number of hex view default')
     armor_default = models.PositiveSmallIntegerField(default=50)
-    block_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block default, %')
+    block_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block default, %',
+                                                            validators=[MaxValueValidator(100)])
     fuel_default = models.PositiveIntegerField(default=100)
 
     def __str__(self):
@@ -66,16 +80,20 @@ class TankType(models.Model):
 
 class Tank(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
+    image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='tanks')
     squad = models.ForeignKey(Squad, on_delete=models.SET_NULL, blank=True, null=True, related_name='tanks')
     hp = models.PositiveIntegerField(default=100)
     action_points = models.PositiveIntegerField(default=100)
     moving_points = models.PositiveIntegerField(default=100)
-    damage_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus, %')
-    critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %")
+    damage_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus, %',
+                                                    validators=[MaxValueValidator(100)])
+    critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %",
+                                                       validators=[MaxValueValidator(100)])
     overlook = models.PositiveSmallIntegerField(default=3, verbose_name='Number of hex view')
     armor = models.PositiveIntegerField(default=50)
-    block_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block, %')
+    block_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block, %',
+                                                    validators=[MaxValueValidator(100)])
     fuel = models.PositiveIntegerField(default=100)
     level = models.PositiveIntegerField(default=1)
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
@@ -88,34 +106,38 @@ class Tank(models.Model):
         return self.level * self.type.hp_step
 
 
-class WeaponType(models.Model):
+class ProjectileType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     color = RGBColorField(verbose_name='Color')
-    tank_types = models.ManyToManyField(TankType, related_name='weapon_types')
+    tank_types = models.ManyToManyField(TankType, related_name='projectile_types')
     max_damage_default = models.PositiveIntegerField(default=20)
     min_damage_default = models.PositiveIntegerField(default=10)
     distance_default = models.PositiveSmallIntegerField(default=5)
     environment_damage_default = models.PositiveIntegerField(default=15)
     critical_hit_bonus_default = models.PositiveSmallIntegerField(default=1,
-                                                                  verbose_name='Critical hit bonus default, %')
+                                                                  verbose_name='Critical hit bonus default, %',
+                                                                  validators=[MaxValueValidator(100)])
     usage_limit_default = models.PositiveSmallIntegerField(default=1)
+    radius_default = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.name
 
 
-class Weapon(models.Model):
+class Projectile(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
-    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='weapons')
+    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='projectiles')
     max_damage = models.PositiveIntegerField(default=20)
     min_damage = models.PositiveIntegerField(default=10)
     distance = models.PositiveSmallIntegerField(default=5)
     environment_damage = models.PositiveIntegerField(default=15)
-    critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %')
+    critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %',
+                                                          validators=[MaxValueValidator(100)])
     usage_limit = models.PositiveSmallIntegerField(default=1)
-    type = models.ForeignKey(WeaponType, on_delete=models.PROTECT, related_name='weapons')
+    type = models.ForeignKey(ProjectileType, on_delete=models.PROTECT, related_name='projectiles')
     ammo = models.PositiveIntegerField(default=10)
-    tank = models.ForeignKey('Tank', on_delete=models.SET_NULL, related_name='weapons', null=True, blank=True)
+    radius = models.PositiveSmallIntegerField(default=0)
+    tank = models.ForeignKey('Tank', on_delete=models.SET_NULL, related_name='projectiles', null=True, blank=True)
 
     def __str__(self):
         return self.name if self.name else f'{self.type.name} {self.pk}'

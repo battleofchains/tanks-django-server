@@ -3,7 +3,7 @@ import random
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from battle_of_chains.battle.models import Squad, Tank, TankType, Weapon, WeaponType
+from battle_of_chains.battle.models import Projectile, ProjectileType, Squad, Tank, TankType
 
 from .models import User
 
@@ -12,8 +12,8 @@ from .models import User
 def create_first_squad(sender, instance, created, **kwargs):
     if created:
         tank_types = TankType.objects.all()
-        weapon_types = WeaponType.objects.all()
-        if tank_types.count() == 0 or weapon_types.count() == 0:
+        projectile_types = ProjectileType.objects.all()
+        if tank_types.count() == 0 or projectile_types.count() == 0:
             return
         tank_types = tuple(tank_types)
         squad = Squad.objects.create(owner=instance, name='First squad')
@@ -30,13 +30,14 @@ def create_first_squad(sender, instance, created, **kwargs):
                                        block_chance=tank_type.block_chance_default,
                                        fuel=tank_type.fuel_default)
 
-            w_types = tuple(weapon_types.filter(tank_types=tank_type))
-            for w in range(tank_type.max_weapons):
-                weapon_type = random.choice(w_types)
-                Weapon.objects.create(owner=instance, type=weapon_type, tank=tank,
-                                      max_damage=weapon_type.max_damage_default,
-                                      min_damage=weapon_type.min_damage_default,
-                                      distance=weapon_type.distance_default,
-                                      environment_damage=weapon_type.environment_damage_default,
-                                      critical_hit_bonus=weapon_type.critical_hit_bonus_default,
-                                      usage_limit=weapon_type.usage_limit_default)
+            p_types = tuple(projectile_types.filter(tank_types=tank_type))
+            for w in range(tank_type.max_projectiles):
+                projectile_type = random.choice(p_types)
+                Projectile.objects.create(owner=instance, type=projectile_type, tank=tank,
+                                          max_damage=projectile_type.max_damage_default,
+                                          min_damage=projectile_type.min_damage_default,
+                                          distance=projectile_type.distance_default,
+                                          environment_damage=projectile_type.environment_damage_default,
+                                          critical_hit_bonus=projectile_type.critical_hit_bonus_default,
+                                          usage_limit=projectile_type.usage_limit_default,
+                                          radius=projectile_type.radius_default)

@@ -6,7 +6,7 @@ sio = socketio.AsyncServer(async_mode='asgi')
 app = socketio.ASGIApp(sio)
 
 
-class ChatNamespace(socketio.AsyncNamespace):
+class MainNamespace(socketio.AsyncNamespace):
     async def on_connect(self, sid, environ):
         user = environ.get('asgi.scope', {}).get('user')
         if user.is_anonymous:
@@ -38,4 +38,4 @@ class ChatNamespace(socketio.AsyncNamespace):
         await self.emit('room_message', {'text': message['text'], 'from': user.username}, room=room.name)
 
 
-sio.register_namespace(ChatNamespace('/chat'))
+sio.register_namespace(MainNamespace('/'))

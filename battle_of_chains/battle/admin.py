@@ -30,11 +30,11 @@ class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
 
 
-@admin.register(WeaponType)
-class WeaponTypeAdmin(admin.ModelAdmin):
+@admin.register(ProjectileType)
+class ProjectileTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'color')
 
 
-@admin.register(Weapon)
-class WeaponAdmin(admin.ModelAdmin):
+@admin.register(Projectile)
+class Projectile(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'owner', 'tank')
