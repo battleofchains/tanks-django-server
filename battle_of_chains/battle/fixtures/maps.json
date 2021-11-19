@@ -1,0 +1,11 @@
+[
+  {
+    "model": "battle.map",
+    "pk": 1,
+    "fields": {
+      "name": "map 1",
+      "json_file": "maps/map 1/hex.json",
+      "sprite_file": "maps/map 1/f_6416192299c9c64c.jpg"
+    }
+  }
+]

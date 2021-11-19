@@ -30,7 +30,7 @@ def create_first_squad(sender, instance, created, **kwargs):
                                        block_chance=tank_type.block_chance_default,
                                        fuel=tank_type.fuel_default)
 
-            w_types = tuple(weapon_types.filter(tank_types__in=tank_type))
+            w_types = tuple(weapon_types.filter(tank_types=tank_type))
             for w in range(tank_type.max_weapons):
                 weapon_type = random.choice(w_types)
                 Weapon.objects.create(owner=instance, type=weapon_type, tank=tank,

@@ -12,7 +12,7 @@ build:
 build-no-cache:
 	$(COMPOSE) build --no-cache
 
-up:
+up: load_fixtures
 	$(COMPOSE) up
 
 down:
@@ -29,3 +29,6 @@ makemigrations:
 
 migrate:
 	$(MANAGE) migrate
+
+load_fixtures:
+	$(MANAGE) loaddata tank_types weapon_types maps --settings=config.settings.local
