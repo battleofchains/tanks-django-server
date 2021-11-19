@@ -20,8 +20,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BattleType',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=30, unique=True)),
+                ('name', models.CharField(max_length=30, primary_key=True, serialize=False)),
                 ('players_number', models.PositiveSmallIntegerField()),
             ],
         ),

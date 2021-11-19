@@ -10,6 +10,11 @@ class MapAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
+@admin.register(BattleType)
+class BattleTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'players_number')
+
+
 @admin.register(Battle)
 class BattleAdmin(AdminNoChangeMixin, admin.ModelAdmin):
     list_display = ('id', 'map', 'created', 'status')

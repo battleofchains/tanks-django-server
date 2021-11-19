@@ -21,8 +21,11 @@ class Map(models.Model):
 
 
 class BattleType(models.Model):
-    name = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=30, primary_key=True)
     players_number = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return self.name
 
 
 class Battle(models.Model):
@@ -40,7 +43,7 @@ class Battle(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT, related_name='battles')
     created = models.DateTimeField(auto_now_add=True)
     duration = models.PositiveIntegerField(default=0, verbose_name='Duration, seconds')
-    status = models.CharField(choices=STATUS.CHOICES, max_length=10)
+    status = models.CharField(choices=STATUS.CHOICES, max_length=10, default=STATUS.WAITING)
     players = models.ManyToManyField('users.User', related_name='battles')
     winner = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True)
     type = models.ForeignKey(BattleType, on_delete=models.CASCADE, related_name='battles')
