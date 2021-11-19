@@ -1,8 +1,12 @@
+import json
 import random
 
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.db.models import Count
+
+from battle_of_chains.battle.serializers import BattleTypeSerializer, SquadSerializer
 
 
 @database_sync_to_async
@@ -11,9 +15,15 @@ def get_battle_types():
     in_cache = cache.get('battle_types')
     if in_cache:
         return in_cache
-    types = tuple(BattleType.objects.all())
+    types = json.dumps(BattleTypeSerializer(BattleType.objects.all(), many=True).data)
     cache.set('battle_types', types, 60*60*24)
     return types
+
+
+@database_sync_to_async
+def get_user_squads(user):
+    from battle_of_chains.battle.models import Squad
+    return json.dumps(SquadSerializer(Squad.objects.filter(owner=user), many=True).data)
 
 
 @database_sync_to_async
@@ -47,3 +57,13 @@ def create_battle(room):
     map_ = random.choice(Map.objects.all())
     battle = Battle.objects.create(map=map_, type=room.battle_type, players=room.users.all())
     return battle
+
+
+@sync_to_async
+def cache_set_async(key, val, timeout):
+    return cache.set(key, val, timeout)
+
+
+@sync_to_async
+def cache_get_async(key):
+    return cache.get(key)
