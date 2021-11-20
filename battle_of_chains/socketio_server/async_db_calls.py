@@ -1,4 +1,3 @@
-import json
 import random
 
 from asgiref.sync import sync_to_async
@@ -15,7 +14,7 @@ def get_battle_types():
     in_cache = cache.get('battle_types')
     if in_cache:
         return in_cache
-    types = json.dumps(BattleTypeSerializer(BattleType.objects.all(), many=True).data)
+    types = BattleTypeSerializer(BattleType.objects.all(), many=True).data
     cache.set('battle_types', types, 60*60*24)
     return types
 
@@ -23,7 +22,7 @@ def get_battle_types():
 @database_sync_to_async
 def get_user_squads(user):
     from battle_of_chains.battle.models import Squad
-    return json.dumps(SquadSerializer(Squad.objects.filter(owner=user), many=True).data)
+    return SquadSerializer(Squad.objects.filter(owner=user), many=True).data
 
 
 @database_sync_to_async
@@ -57,6 +56,20 @@ def create_battle(room):
     map_ = random.choice(Map.objects.all())
     battle = Battle.objects.create(map=map_, type=room.battle_type, players=room.users.all())
     return battle
+
+
+@database_sync_to_async
+def set_battle_status(battle, status):
+    battle.status = status
+    battle.save(update_fields=['status'])
+
+
+@database_sync_to_async
+def set_battle_winner(battle, winner):
+    from battle_of_chains.users.models import User
+    winner = User.objects.get(username=winner)
+    battle.winner = winner
+    battle.save(update_fields=['winner'])
 
 
 @sync_to_async

@@ -5,7 +5,7 @@ import socketio
 
 from .async_db_calls import (
     add_user_to_room, cache_get_async, cache_set_async, create_battle, get_a_room, get_battle_types,
-    get_room_user_names, get_user_squads, remove_user_from_room)
+    get_room_user_names, get_user_squads, remove_user_from_room, set_battle_status, set_battle_winner,)
 
 sio = socketio.AsyncServer(async_mode='asgi')
 app = socketio.ASGIApp(sio)
@@ -33,10 +33,12 @@ class MainNamespace(socketio.AsyncNamespace):
         async with self.session(sid) as session:
             user = session['user']
             session['room'] = room
+            squad = session['squad']
         self.enter_room(sid, room.name)
         await add_user_to_room(room, user)
         users = await get_room_user_names(room)
-        await self.emit('joined', {'sid': sid, 'username': user.username, 'users': users}, room=room.name)
+        await self.emit('joined',
+                        {'sid': sid, 'username': user.username, 'users': users, 'squad': squad}, room=room.name)
         if len(users) == room.battle_type.players_number:
             battle = await create_battle(room)
             async with self.session(sid) as session:
@@ -45,10 +47,12 @@ class MainNamespace(socketio.AsyncNamespace):
             order = users
             current_player = order[0]
             await cache_set_async(f'battle_{battle.id}',
-                                  {'battle': battle, 'order': order, 'current_player': current_player}, 60*60)
+                                  {'battle': battle, 'order': order,
+                                   'current_player': current_player, 'state': 'running'}, 60*60)
             for i in range(5, 0, -1):
                 await asyncio.sleep(1)
-                await self.emit('start', {'left': i}, room=room.name)
+                await self.emit('start', {'t_minus': i}, room=room.name)
+            await set_battle_status(battle, 'running')
             await self.wait_next_move(current_player, room, battle.id)
 
     async def on_move(self, sid, message):
@@ -60,16 +64,28 @@ class MainNamespace(socketio.AsyncNamespace):
         battle_data = await cache_get_async(f'battle_{battle_id}')
         battle_data = self.set_next_player(battle_data)
         await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
-        await self.wait_next_move(battle_data['current_player'], room, battle_id)
+
+    async def on_win(self, sid, message):
+        async with self.session(sid) as session:
+            room = session.get('room')
+            battle_id = session.get('battle_id')
+        battle_data = await cache_get_async(f'battle_{battle_id}')
+        await self.finish_game(battle_data, message['winner'], room)
 
     async def on_disconnect(self, sid):
         async with self.session(sid) as session:
-            room = session['room']
+            room = session.get('room')
             user = session['user']
-        self.leave_room(sid, room.name)
-        await remove_user_from_room(room, user)
-        users = await get_room_user_names(room)
-        await self.emit('left', {'sid': sid, 'username': user.username, 'users': users}, room=room.name)
+            battle_id = session.get('battle_id')
+        if room:
+            self.leave_room(sid, room.name)
+            await remove_user_from_room(room, user)
+            users = await get_room_user_names(room)
+            await self.emit('left', {'sid': sid, 'username': user.username, 'users': users}, room=room.name)
+            if battle_id and len(users) == 1:
+                battle_data = await cache_get_async(f'battle_{battle_id}')
+                if battle_data['state'] == 'running':
+                    await self.finish_game(battle_data, users[0], room)
         await self.disconnect(sid)
 
     async def on_room_message(self, sid, message):
@@ -82,15 +98,23 @@ class MainNamespace(socketio.AsyncNamespace):
         for i in range(15, 0, -1):
             await asyncio.sleep(1)
             battle_data = await cache_get_async(f'battle_{battle_id}')
-            if battle_data['current_player'] == current_player:
-                await self.emit('make_move', {'current_player': current_player}, room=room.name)
-            else:
-                return
+            if battle_data['state'] == 'running':
+                if battle_data['current_player'] == current_player:
+                    await self.emit('make_move', {'current_player': current_player, 't_minus': i}, room=room.name)
+                else:
+                    return await self.wait_next_move(battle_data['current_player'], room, battle_id)
         battle_data = await cache_get_async(f'battle_{battle_id}')
-        if battle_data['current_player'] == current_player:
+        if battle_data['current_player'] == current_player and battle_data['state'] == 'running':
             battle_data = self.set_next_player(battle_data)
             await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
-            await self.wait_next_move(current_player, room, battle_id)
+            await self.wait_next_move(battle_data['current_player'], room, battle_id)
+
+    async def finish_game(self, battle_data, winner, room):
+        await set_battle_status(battle_data['battle'], 'finished')
+        await set_battle_winner(battle_data['battle'], winner)
+        battle_data['state'] = 'finished'
+        await cache_set_async(f"battle_{battle_data['battle'].id}", battle_data, 60 * 60)
+        await self.emit('win', {'winner': winner}, room=room.name)
 
     @staticmethod
     def set_next_player(battle_data):
