@@ -18,6 +18,9 @@ up: load_fixtures
 up[daemon]:
 	$(COMPOSE) up -d
 
+stop:
+	$(COMPOSE) stop
+
 down:
 	$(COMPOSE) down
 
