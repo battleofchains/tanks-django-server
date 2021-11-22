@@ -6,17 +6,40 @@
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            let namespace = '/chat';
-            const socket = io('ws://' + document.domain + ':' + location.port + namespace, {transports: ['websocket']});
+            const socket = io('ws://' + document.domain + ':' + location.port, {transports: ['websocket']});
+            socket.on('select_squad', function (msg) {
+              console.log(msg)
+              socket.emit('select_squad', {'squad': msg.squads[0]});
+            });
+            socket.on('select_battle', function (msg) {
+              msg.battle_types.forEach(function (val, i, arr) {
+                $( `<option value="${val.name}">${val.name}</option>` ).appendTo( ".select_battle" );
+              });
+            });
             socket.on('joined', function(msg) {
                 console.log(msg);
             });
-            socket.on('disconnect', function() {
-                $('#log').append('<br>Disconnected');
-            });
-            socket.on('info', function(msg) {
+            socket.on('start', function (msg) {
               console.log(msg);
-                $('#log').append('<br>Received: ' + msg.data);
+              $('#start_timer').text(msg.t_minus);
+            });
+            socket.on('make_move', function (msg) {
+              console.log(msg);
+              $('#current_player').text(msg.current_player);
+              $('#timer').text(msg.t_minus);
+            });
+            socket.on('move', function (msg) {
+              console.log(msg);
+            });
+            socket.on('lose', function (msg) {
+              console.log(msg);
+            });
+            socket.on('left', function (msg) {
+              console.log(msg);
+            });
+            socket.on('win', function (msg) {
+              console.log(msg);
+              $('#winner').text(msg.winner);
             });
             socket.on('room_message', function (msg) {
               $('#chat').append('<br> ' + msg.from + ': ' + msg.text);
@@ -25,8 +48,17 @@
                 socket.emit('room_message', {text: $('#room_data').val()});
                 return false;
             });
-            $('form#disconnect').submit(function(event) {
-                socket.disconnect();
+            $('form#move').submit(function(event) {
+                socket.emit('move', {"user": socket.id, "data": $('#room_data').val()});
+                return false;
+            });
+            $('form#select_battle').submit(function (event) {
+              console.log(event);
+              socket.emit('select_battle', {'battle_type': $('.select_battle').val()});
+              return false;
+            });
+            $('form#lose').submit(function(event) {
+                socket.emit('lose', {"user": socket.id, "data": "I lose"});
                 return false;
             });
         });
@@ -35,17 +67,26 @@
 <body>
     <h1>python-socketio test</h1>
     <h2>Send:</h2>
-    <form id="send_room" method="POST" action='#'>{% csrf_token %}
+    <form id="select_battle" action="#">{% csrf_token %}
+      <select class="select_battle"></select>
+      <input type="submit" value="Select battle">
+    </form>
+    <form id="send_room" action='#'>{% csrf_token %}
         <input type="text" name="room_data" id="room_data" placeholder="Message">
         <input type="submit" value="Send to Room">
     </form>
-    <form id="disconnect" method="POST" action="#">{% csrf_token %}
-        <input type="submit" value="Disconnect">
+    <form id="move" action="#">{% csrf_token %}
+        <input type="text" name="move_data" id="move_data" placeholder="Move">
+        <input type="submit" value="Move">
+    </form>
+    <form id="lose" action="#">{% csrf_token %}
+      <input type="submit" value="Lose">
     </form>
     <h2>Chat:</h2>
     <div><p id="chat"></p></div>
     <br>
-    <h2>Receive:</h2>
-    <div><p id="log"></p></div>
+    <h2>Start: <span id="start_timer"></span></h2>
+    <h2>Current Player: <span id="current_player"></span>. Timer: <span id="timer"></span></h2>
+    <h3>Winner: <span id="winner"></span></h3>
 </body>
 </html>
