@@ -12,3 +12,4 @@ REDIS_URL=redis://redis:6379/0
 # Flower
 CELERY_FLOWER_USER=voRNOaqhpGlDiLXyhzjrUQhmwfLZwoIu
 CELERY_FLOWER_PASSWORD=E4KKUSaI2UIyi0JzSIbbc4cjrGMWGoAGFNHpEkF6d9pwNZ5H2J1LhzX5SAJa9FoY
+DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
