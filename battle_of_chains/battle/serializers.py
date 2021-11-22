@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from .models import BattleType, Squad, Tank, TankType
+from .models import BattleType, Map, Squad, Tank, TankType
+
+
+class MapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Map
+        fields = '__all__'
 
 
 class BattleTypeSerializer(serializers.ModelSerializer):

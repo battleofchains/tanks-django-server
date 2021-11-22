@@ -4,8 +4,17 @@ import random
 import socketio
 
 from .async_db_calls import (
-    add_user_to_room, cache_get_async, cache_set_async, create_battle, get_a_room, get_battle_types,
-    get_room_user_names, get_user_squads, remove_user_from_room, set_battle_status, set_battle_winner,)
+    add_user_to_room,
+    cache_get_async,
+    cache_set_async,
+    get_a_room,
+    get_battle_types,
+    get_room_user_names,
+    get_user_squads,
+    remove_user_from_room,
+    set_battle_status,
+    set_battle_winner,
+)
 
 sio = socketio.AsyncServer(async_mode='asgi')
 app = socketio.ASGIApp(sio)
@@ -29,7 +38,7 @@ class MainNamespace(socketio.AsyncNamespace):
         await self.emit('select_battle', {'battle_types': battle_types}, room=sid)
 
     async def on_select_battle(self, sid, message):
-        room, battle_type = await get_a_room(message['battle_type'])
+        room, battle, battle_type, map_ = await get_a_room(message['battle_type'])
         async with self.session(sid) as session:
             user = session['user']
             session['room'] = room
@@ -38,8 +47,8 @@ class MainNamespace(socketio.AsyncNamespace):
         await add_user_to_room(room, user)
         users = await get_room_user_names(room)
         await self.emit('joined',
-                        {'sid': sid, 'username': user.username, 'users': users, 'squad': squad}, room=room.name)
-        battle = await create_battle(room)
+                        {'sid': sid, 'username': user.username, 'users': users, 'squad': squad, 'map': map_},
+                        room=room.name)
         async with self.session(sid) as session:
             session['battle_id'] = battle.id
         if len(users) == battle_type.players_number:

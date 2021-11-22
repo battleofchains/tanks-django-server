@@ -28,13 +28,24 @@ def get_user_squads(user):
 @database_sync_to_async
 def get_a_room(battle_type):
     from .models import Room
+    from battle_of_chains.battle.models import Battle, BattleType, Map
+    from battle_of_chains.battle.serializers import MapSerializer
+    b_type = BattleType.objects.get(name=battle_type)
     available_rooms = Room.objects.annotate(users_count=Count('users'))\
-        .filter(users_count__lt=4, battle_type__name=battle_type)
+        .filter(users_count__lt=b_type.players_number, battle__type=b_type,
+                battle__status__in=[Battle.STATUS.WAITING, Battle.STATUS.FINISHED])
     if available_rooms.count() == 0:
-        room = Room.objects.create(battle_type_id=battle_type)
-        return room, room.battle_type
+        map_ = random.choice(Map.objects.all())
+        battle = Battle.objects.create(map=map_, type=b_type)
+        room = Room.objects.create(battle=battle)
+        return room, room.battle, room.battle.type, MapSerializer(room.battle.map).data
     room = available_rooms.first()
-    return room, room.battle_type
+    if room.battle.status == Battle.STATUS.FINISHED:
+        map_ = random.choice(Map.objects.all())
+        battle = Battle.objects.create(map=map_, type=b_type)
+        room.battle = battle
+        room.save()
+    return room, room.battle, room.battle.type, MapSerializer(room.battle.map).data
 
 
 @database_sync_to_async
@@ -50,15 +61,6 @@ def remove_user_from_room(room, user):
 @database_sync_to_async
 def get_room_user_names(room):
     return list(room.users.values_list('username', flat=True))
-
-
-@database_sync_to_async
-def create_battle(room):
-    from battle_of_chains.battle.models import Battle, Map
-    map_ = random.choice(Map.objects.all())
-    battle = Battle.objects.create(map=map_, type=room.battle_type)
-    battle.players.set(room.users.all())
-    return battle
 
 
 @database_sync_to_async
