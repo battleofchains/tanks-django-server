@@ -15,6 +15,9 @@ build-no-cache:
 up: load_fixtures
 	$(COMPOSE) up
 
+up[daemon]:
+	$(COMPOSE) up -d
+
 down:
 	$(COMPOSE) down
 
