@@ -30,10 +30,10 @@ EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
 )
 EMAIL_HOST = env.str('EMAIL_HOST', 'smtp.yandex.ru')
-EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', 'alexey.mihailov@ubex.com')
-EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', 'Adghfyu65e74w536')
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', 'noreply@battleofchains.com')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', 'lrGxL3xhH1u7')
 EMAIL_PORT = env.str('EMAIL_PORT', 465)
-DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', 'alexey.mihailov@ubex.com')
+DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', 'noreply@battleofchains.com')
 EMAIL_USE_SSL = True
 
 # django-debug-toolbar

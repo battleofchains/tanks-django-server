@@ -5,11 +5,15 @@ from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.db.models import Count
 
+from battle_of_chains.battle.models import Battle, BattleType, Map, Squad
+from battle_of_chains.battle.serializers import BattleTypeSerializer, MapSerializer, SquadSerializer
+from battle_of_chains.users.models import User
+
+from .models import Room
+
 
 @database_sync_to_async
 def get_battle_types():
-    from battle_of_chains.battle.models import BattleType
-    from battle_of_chains.battle.serializers import BattleTypeSerializer
     in_cache = cache.get('battle_types')
     if in_cache:
         return in_cache
@@ -20,16 +24,11 @@ def get_battle_types():
 
 @database_sync_to_async
 def get_user_squads(user):
-    from battle_of_chains.battle.models import Squad
-    from battle_of_chains.battle.serializers import SquadSerializer
     return SquadSerializer(Squad.objects.filter(owner=user), many=True).data
 
 
 @database_sync_to_async
 def get_a_room(battle_type):
-    from .models import Room
-    from battle_of_chains.battle.models import Battle, BattleType, Map
-    from battle_of_chains.battle.serializers import MapSerializer
     b_type = BattleType.objects.get(name=battle_type)
     available_rooms = Room.objects.annotate(users_count=Count('users'))\
         .filter(users_count__lt=b_type.players_number, battle__type=b_type,
@@ -72,7 +71,6 @@ def set_battle_status(battle, status):
 
 @database_sync_to_async
 def set_battle_winner(battle, winner):
-    from battle_of_chains.users.models import User
     winner = User.objects.get(username=winner)
     battle.winner = winner
     battle.save(update_fields=['winner'])
