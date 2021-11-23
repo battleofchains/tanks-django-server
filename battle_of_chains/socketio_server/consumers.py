@@ -16,7 +16,7 @@ from .async_db_calls import (
     set_battle_winner,
 )
 
-sio = socketio.AsyncServer(async_mode='asgi')
+sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
 
 
@@ -103,7 +103,7 @@ class MainNamespace(socketio.AsyncNamespace):
     async def on_disconnect(self, sid):
         async with self.session(sid) as session:
             room = session.get('room')
-            user = session['user']
+            user = session.get('user')
             battle_id = session.get('battle_id')
         if room:
             self.leave_room(sid, room.name)
