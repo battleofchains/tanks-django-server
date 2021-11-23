@@ -51,6 +51,7 @@ def get_a_room(battle_type):
 @database_sync_to_async
 def add_user_to_room(room, user):
     room.users.add(user)
+    room.battle.players.add(user)
 
 
 @database_sync_to_async

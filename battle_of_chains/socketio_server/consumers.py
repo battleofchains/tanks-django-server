@@ -46,18 +46,28 @@ class MainNamespace(socketio.AsyncNamespace):
         self.enter_room(sid, room.name)
         await add_user_to_room(room, user)
         users = await get_room_user_names(room)
-        await self.emit('joined',
-                        {'sid': sid, 'username': user.username, 'users': users, 'squad': squad, 'map': map_},
-                        room=room.name)
+        battle_data = await cache_get_async(f'battle_{battle.id}')
+        user_data = {'username': user.username, 'squad': squad}
+        if battle_data:
+            battle_data['users'].append(user_data)
+        else:
+            battle_data = {'battle': battle, 'state': 'waiting', 'users': [user_data]}
+        await cache_set_async(f'battle_{battle.id}', battle_data, 60*60)
+        await self.emit(
+            'joined',
+            {'sid': sid, 'username': user.username, 'users': battle_data['users'], 'map': map_},
+            room=room.name
+        )
         async with self.session(sid) as session:
             session['battle_id'] = battle.id
         if len(users) == battle_type.players_number:
             random.shuffle(users)
             order = users
             current_player = order[0]
-            await cache_set_async(f'battle_{battle.id}',
-                                  {'battle': battle, 'order': order,
-                                   'current_player': current_player, 'state': 'running'}, 60*60)
+            battle_data['order'] = order
+            battle_data['current_player'] = current_player
+            battle_data['state'] = 'running'
+            await cache_set_async(f'battle_{battle.id}', battle_data, 60*60)
             for i in range(5, 0, -1):
                 await asyncio.sleep(1)
                 await self.emit('start', {'t_minus': i}, room=room.name)
@@ -102,11 +112,14 @@ class MainNamespace(socketio.AsyncNamespace):
             await self.emit('left', {'sid': sid, 'username': user.username, 'users': users}, room=room.name)
             if battle_id:
                 battle_data = await cache_get_async(f'battle_{battle_id}')
-                order = battle_data['order']
-                order.pop(order.index(user.username))
-                battle_data['order'] = order
+                order = battle_data.get('order')
+                if order:
+                    order.pop(order.index(user.username))
+                    battle_data['order'] = order
                 if battle_data['state'] == 'running' and len(users) == 1:
                     await self.finish_game(battle_data, room)
+                elif order:
+                    await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
         await self.disconnect(sid)
 
     async def on_room_message(self, sid, message):

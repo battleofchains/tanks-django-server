@@ -6,7 +6,7 @@
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            const socket = io('wss://' + document.domain + ':' + location.port, {transports: ['websocket']});
+            const socket = io('ws://' + document.domain + ':' + location.port, {transports: ['websocket']});
             socket.on('select_squad', function (msg) {
               console.log(msg)
               socket.emit('select_squad', {'squad': msg.squads[0]});
@@ -49,11 +49,10 @@
                 return false;
             });
             $('form#move').submit(function(event) {
-                socket.emit('move', {"user": socket.id, "data": $('#room_data').val()});
+                socket.emit('move', {"user": socket.id, "data": $('#move_data').val()});
                 return false;
             });
             $('form#select_battle').submit(function (event) {
-              console.log(event);
               socket.emit('select_battle', {'battle_type': $('.select_battle').val()});
               return false;
             });
