@@ -9,6 +9,7 @@ django-celery-beat==2.2.1  # https://github.com/celery/django-celery-beat
 flower==1.0.0  # https://github.com/mher/flower
 uvicorn[standard]==0.15.0  # https://github.com/encode/uvicorn
 python-socketio==5.5.0  # https://github.com/miguelgrinberg/python-socketio
+loguru==0.5.3  # https://github.com/Delgan/loguru
 
 # Django
 # ------------------------------------------------------------------------------

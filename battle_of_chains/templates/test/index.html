@@ -16,6 +16,9 @@
                 $( `<option value="${val.name}">${val.name}</option>` ).appendTo( ".select_battle" );
               });
             });
+            socket.on('error', function(msg) {
+              console.log(msg);
+            });
             socket.on('joined', function(msg) {
                 console.log(msg);
             });

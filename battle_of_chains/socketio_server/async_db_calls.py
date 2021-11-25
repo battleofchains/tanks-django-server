@@ -59,6 +59,11 @@ def remove_user_from_room(room, user):
 
 
 @database_sync_to_async
+def clear_room(room):
+    room.users.clear()
+
+
+@database_sync_to_async
 def get_room_user_names(room):
     return list(room.users.values_list('username', flat=True))
 

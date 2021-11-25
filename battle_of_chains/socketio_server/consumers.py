@@ -1,26 +1,37 @@
 import asyncio
 import random
+import traceback
+from functools import wraps
 
 import socketio
+from loguru import logger
 
 from .async_db_calls import (
-    add_user_to_room,
-    cache_get_async,
-    cache_set_async,
-    get_a_room,
-    get_battle_types,
-    get_room_user_names,
-    get_user_squads,
-    remove_user_from_room,
-    set_battle_status,
-    set_battle_winner,
-)
+    add_user_to_room, cache_get_async, cache_set_async, clear_room, get_a_room, get_battle_types, get_room_user_names,
+    get_user_squads, remove_user_from_room, set_battle_status, set_battle_winner,)
 
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
 
 
+def log_and_emit_error(function):
+    @wraps(function)
+    async def wrapper(*args, **kwargs):
+        self = args[0]
+        sid = args[1]
+        try:
+            return await function(*args, **kwargs)
+        except Exception as e:
+            tb = traceback.format_exc()
+            err = f"Exception in {function.__name__}. Error: {e}. Traceback: {tb}"
+            logger.error(err)
+            await self.emit('error', {'error': str(e), 'traceback': tb}, room=sid)
+            raise e
+    return wrapper
+
+
 class MainNamespace(socketio.AsyncNamespace):
+    @log_and_emit_error
     async def on_connect(self, sid, environ):
         user = environ.get('asgi.scope', {}).get('user')
         if user.is_anonymous:
@@ -31,12 +42,14 @@ class MainNamespace(socketio.AsyncNamespace):
             squads = await get_user_squads(user)
             await self.emit('select_squad', {'squads': squads}, room=sid)
 
+    @log_and_emit_error
     async def on_select_squad(self, sid, message):
         battle_types = await get_battle_types()
         async with self.session(sid) as session:
             session['squad'] = message['squad']
         await self.emit('select_battle', {'battle_types': battle_types}, room=sid)
 
+    @log_and_emit_error
     async def on_select_battle(self, sid, message):
         room, battle, battle_type, map_ = await get_a_room(message['battle_type'])
         async with self.session(sid) as session:
@@ -47,7 +60,7 @@ class MainNamespace(socketio.AsyncNamespace):
         await add_user_to_room(room, user)
         users = await get_room_user_names(room)
         battle_data = await cache_get_async(f'battle_{battle.id}')
-        user_data = {'username': user.username, 'squad': squad}
+        user_data = {'username': user.username, 'squad': squad, 'sid': sid}
         if battle_data:
             battle_data['users'].append(user_data)
         else:
@@ -74,6 +87,7 @@ class MainNamespace(socketio.AsyncNamespace):
             await set_battle_status(battle, 'running')
             await self.wait_next_move(current_player, room, battle.id)
 
+    @log_and_emit_error
     async def on_move(self, sid, message):
         async with self.session(sid) as session:
             room = session['room']
@@ -85,6 +99,7 @@ class MainNamespace(socketio.AsyncNamespace):
             battle_data = self.set_next_player(battle_data)
             await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
 
+    @log_and_emit_error
     async def on_lose(self, sid, message):
         async with self.session(sid) as session:
             user = session['user']
@@ -100,6 +115,7 @@ class MainNamespace(socketio.AsyncNamespace):
         if len(order) == 1:
             await self.finish_game(battle_data, room)
 
+    @log_and_emit_error
     async def on_disconnect(self, sid):
         async with self.session(sid) as session:
             room = session.get('room')
@@ -122,6 +138,7 @@ class MainNamespace(socketio.AsyncNamespace):
                     await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
         await self.disconnect(sid)
 
+    @log_and_emit_error
     async def on_room_message(self, sid, message):
         async with self.session(sid) as session:
             room = session['room']
@@ -151,6 +168,10 @@ class MainNamespace(socketio.AsyncNamespace):
         battle_data['state'] = 'finished'
         await cache_set_async(f"battle_{battle_data['battle'].id}", battle_data, 60 * 60)
         await self.emit('win', {'winner': winner}, room=room.name)
+        await self.close_room(room.name)
+        for u in battle_data['users']:
+            await self.disconnect(u['sid'])
+        await clear_room(room)
 
     @staticmethod
     def set_next_player(battle_data):
