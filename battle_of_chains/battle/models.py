@@ -113,8 +113,7 @@ class ProjectileType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     color = RGBColorField(verbose_name='Color')
     tank_types = models.ManyToManyField(TankType, related_name='projectile_types')
-    max_damage_default = models.PositiveIntegerField(default=20)
-    min_damage_default = models.PositiveIntegerField(default=10)
+    avg_damage_default = models.PositiveIntegerField(default=10)
     distance_default = models.PositiveSmallIntegerField(default=5)
     environment_damage_default = models.PositiveIntegerField(default=15)
     critical_hit_bonus_default = models.PositiveSmallIntegerField(default=1,
@@ -122,6 +121,9 @@ class ProjectileType(models.Model):
                                                                   validators=[MaxValueValidator(100)])
     usage_limit_default = models.PositiveSmallIntegerField(default=1)
     radius_default = models.PositiveSmallIntegerField(default=0)
+    ricochet_chance_default = models.PositiveSmallIntegerField(default=1,
+                                                               verbose_name='Ricochet chance default, %',
+                                                               validators=[MaxValueValidator(100)])
 
     def __str__(self):
         return self.name
@@ -130,8 +132,7 @@ class ProjectileType(models.Model):
 class Projectile(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='projectiles')
-    max_damage = models.PositiveIntegerField(default=20)
-    min_damage = models.PositiveIntegerField(default=10)
+    avg_damage = models.PositiveIntegerField(default=10)
     distance = models.PositiveSmallIntegerField(default=5)
     environment_damage = models.PositiveIntegerField(default=15)
     critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %',
@@ -140,6 +141,9 @@ class Projectile(models.Model):
     type = models.ForeignKey(ProjectileType, on_delete=models.PROTECT, related_name='projectiles')
     ammo = models.PositiveIntegerField(default=10)
     radius = models.PositiveSmallIntegerField(default=0)
+    ricochet_chance = models.PositiveSmallIntegerField(default=1,
+                                                       verbose_name='Ricochet chance, %',
+                                                       validators=[MaxValueValidator(100)])
     tank = models.ForeignKey('Tank', on_delete=models.SET_NULL, related_name='projectiles', null=True, blank=True)
 
     def __str__(self):

@@ -12,7 +12,7 @@ build:
 build-no-cache:
 	$(COMPOSE) build --no-cache
 
-up: load_fixtures
+up: migrate load_fixtures
 	$(COMPOSE) up
 
 up[daemon]:

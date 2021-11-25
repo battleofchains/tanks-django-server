@@ -1,7 +1,7 @@
 import pytest
 from django.test import RequestFactory
 
-from battle_of_chains.users.api.views import UserViewSet
+from battle_of_chains.api.views import UserViewSet
 from battle_of_chains.users.models import User
 
 pytestmark = pytest.mark.django_db

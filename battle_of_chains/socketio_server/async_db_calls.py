@@ -2,14 +2,20 @@ import random
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db.models import Count
 
 from battle_of_chains.battle.models import Battle, BattleType, Map, Squad
-from battle_of_chains.battle.serializers import BattleTypeSerializer, MapSerializer, SquadSerializer
-from battle_of_chains.users.models import User
+from battle_of_chains.battle.serializers import (
+    BattleTypeSerializer,
+    MapSerializer,
+    SquadSerializer,
+)
 
 from .models import Room
+
+User = get_user_model()
 
 
 @database_sync_to_async

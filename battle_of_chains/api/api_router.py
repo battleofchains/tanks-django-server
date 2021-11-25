@@ -3,7 +3,12 @@ from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
-from battle_of_chains.users.api.views import UserViewSet
+from battle_of_chains.api.views import (
+    ProjectileViewSet,
+    SquadViewSet,
+    TankViewSet,
+    UserViewSet,
+)
 
 if settings.DEBUG:
     router = DefaultRouter()
@@ -11,6 +16,9 @@ else:
     router = SimpleRouter()
 
 router.register("users", UserViewSet)
+router.register("tanks", TankViewSet)
+router.register("squads", SquadViewSet)
+router.register("projectiles", ProjectileViewSet)
 
 
 app_name = "api"

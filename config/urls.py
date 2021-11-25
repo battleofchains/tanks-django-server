@@ -21,7 +21,7 @@ if settings.DEBUG:
 # API URLS
 urlpatterns += [
     # API base url
-    path("api/", include("config.api_router")),
+    path("api/", include("battle_of_chains.api.api_router")),
 ]
 
 if settings.DEBUG:

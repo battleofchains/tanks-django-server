@@ -5,8 +5,7 @@
     "fields": {
       "name": "Common",
       "color": "#b0b0b0",
-      "max_damage_default": 20,
-      "min_damage_default": 10,
+      "avg_damage_default": 10,
       "distance_default": 5,
       "environment_damage_default": 15,
       "critical_hit_bonus_default": 1,
@@ -24,8 +23,7 @@
     "fields": {
       "name": "Big",
       "color": "#787878",
-      "max_damage_default": 40,
-      "min_damage_default": 20,
+      "avg_damage_default": 30,
       "distance_default": 5,
       "environment_damage_default": 20,
       "critical_hit_bonus_default": 1,
@@ -41,8 +39,7 @@
     "fields": {
       "name": "Fire",
       "color": "#787878",
-      "max_damage_default": 50,
-      "min_damage_default": 15,
+      "avg_damage_default": 40,
       "distance_default": 1,
       "environment_damage_default": 30,
       "critical_hit_bonus_default": 1,
@@ -58,8 +55,7 @@
     "fields": {
       "name": "Armor-piercing",
       "color": "#1adb3a",
-      "max_damage_default": 35,
-      "min_damage_default": 20,
+      "avg_damage_default": 20,
       "distance_default": 7,
       "environment_damage_default": 10,
       "critical_hit_bonus_default": 20,
@@ -75,8 +71,7 @@
     "fields": {
       "name": "Slowing",
       "color": "#7e7c7c",
-      "max_damage_default": 20,
-      "min_damage_default": 10,
+      "avg_damage_default": 10,
       "distance_default": 5,
       "environment_damage_default": 15,
       "critical_hit_bonus_default": 1,
@@ -92,8 +87,7 @@
     "fields": {
       "name": "Ricochet",
       "color": "#4ad317",
-      "max_damage_default": 40,
-      "min_damage_default": 10,
+      "avg_damage_default": 10,
       "distance_default": 5,
       "environment_damage_default": 25,
       "critical_hit_bonus_default": 1,
