@@ -29,15 +29,13 @@ def generate_first_squad(instance):
                                    fuel=tank_type.fuel_default)
 
         p_types = tuple(projectile_types.filter(tank_types=tank_type))
-        for w in range(tank_type.max_projectiles):
-            projectile_type = random.choice(p_types)
+        for projectile_type in p_types:
             Projectile.objects.create(owner=instance, type=projectile_type, tank=tank,
                                       avg_damage=projectile_type.avg_damage_default,
                                       ricochet_chance=projectile_type.ricochet_chance_default,
                                       distance=projectile_type.distance_default,
                                       environment_damage=projectile_type.environment_damage_default,
                                       critical_hit_bonus=projectile_type.critical_hit_bonus_default,
-                                      usage_limit=projectile_type.usage_limit_default,
                                       radius=projectile_type.radius_default)
 
 

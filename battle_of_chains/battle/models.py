@@ -63,7 +63,6 @@ class Squad(models.Model):
 class TankType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     hp_step = models.PositiveSmallIntegerField(default=100)
-    max_projectiles = models.PositiveSmallIntegerField(default=1)
     max_equipment = models.PositiveSmallIntegerField(default=1)
     action_points_default = models.PositiveIntegerField(default=100)
     moving_points_default = models.PositiveIntegerField(default=100)
@@ -119,7 +118,6 @@ class ProjectileType(models.Model):
     critical_hit_bonus_default = models.PositiveSmallIntegerField(default=1,
                                                                   verbose_name='Critical hit bonus default, %',
                                                                   validators=[MaxValueValidator(100)])
-    usage_limit_default = models.PositiveSmallIntegerField(default=1)
     radius_default = models.PositiveSmallIntegerField(default=0)
     ricochet_chance_default = models.PositiveSmallIntegerField(default=1,
                                                                verbose_name='Ricochet chance default, %',
@@ -137,14 +135,13 @@ class Projectile(models.Model):
     environment_damage = models.PositiveIntegerField(default=15)
     critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %',
                                                           validators=[MaxValueValidator(100)])
-    usage_limit = models.PositiveSmallIntegerField(default=1)
     type = models.ForeignKey(ProjectileType, on_delete=models.PROTECT, related_name='projectiles')
     ammo = models.PositiveIntegerField(default=10)
     radius = models.PositiveSmallIntegerField(default=0)
     ricochet_chance = models.PositiveSmallIntegerField(default=1,
                                                        verbose_name='Ricochet chance, %',
                                                        validators=[MaxValueValidator(100)])
-    tank = models.ForeignKey('Tank', on_delete=models.SET_NULL, related_name='projectiles', null=True, blank=True)
+    tank = models.ForeignKey('Tank', on_delete=models.CASCADE, related_name='projectiles', null=True, blank=True)
 
     def __str__(self):
         return self.name if self.name else f'{self.type.name} {self.pk}'

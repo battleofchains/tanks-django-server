@@ -9,7 +9,6 @@
       "distance_default": 5,
       "environment_damage_default": 15,
       "critical_hit_bonus_default": 1,
-      "usage_limit_default": 1,
       "tank_types": [
         1,
         2,
@@ -27,7 +26,6 @@
       "distance_default": 5,
       "environment_damage_default": 20,
       "critical_hit_bonus_default": 1,
-      "usage_limit_default": 1,
       "tank_types": [
         1
       ]
@@ -43,7 +41,6 @@
       "distance_default": 1,
       "environment_damage_default": 30,
       "critical_hit_bonus_default": 1,
-      "usage_limit_default": 1,
       "tank_types": [
         3
       ]
@@ -59,7 +56,6 @@
       "distance_default": 7,
       "environment_damage_default": 10,
       "critical_hit_bonus_default": 20,
-      "usage_limit_default": 1,
       "tank_types": [
         3
       ]
@@ -75,7 +71,6 @@
       "distance_default": 5,
       "environment_damage_default": 15,
       "critical_hit_bonus_default": 1,
-      "usage_limit_default": 1,
       "tank_types": [
         2
       ]
@@ -91,7 +86,6 @@
       "distance_default": 5,
       "environment_damage_default": 25,
       "critical_hit_bonus_default": 1,
-      "usage_limit_default": 1,
       "tank_types": [
         1
       ]

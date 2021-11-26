@@ -5,7 +5,6 @@
     "fields": {
       "name": "Heavy",
       "hp_step": 200,
-      "max_projectiles": 2,
       "max_equipment": 1,
       "action_points_default": 100,
       "moving_points_default": 80,
@@ -23,7 +22,6 @@
     "fields": {
       "name": "Light",
       "hp_step": 100,
-      "max_projectiles": 1,
       "max_equipment": 2,
       "action_points_default": 100,
       "moving_points_default": 100,
@@ -41,7 +39,6 @@
     "fields": {
       "name": "Artillery",
       "hp_step": 100,
-      "max_projectiles": 1,
       "max_equipment": 1,
       "action_points_default": 100,
       "moving_points_default": 100,
