@@ -7,8 +7,14 @@ import socketio
 from loguru import logger
 
 from .async_db_calls import (
-    add_user_to_room, cache_get_async, cache_set_async, clear_room, get_a_room, get_battle_types, get_room_user_names,
-    get_user_squads, remove_user_from_room, set_battle_status, set_battle_winner,)
+    clear_room,
+    get_a_room,
+    get_battle_types,
+    get_user_tanks,
+    set_battle_status,
+    set_battle_winner,
+)
+from .game import Game
 
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
@@ -31,6 +37,11 @@ def log_and_emit_error(function):
 
 
 class MainNamespace(socketio.AsyncNamespace):
+
+    def __init__(self, namespace=None):
+        self.games = {}
+        super(MainNamespace, self).__init__(namespace=namespace)
+
     @log_and_emit_error
     async def on_connect(self, sid, environ):
         user = environ.get('asgi.scope', {}).get('user')
@@ -39,166 +50,147 @@ class MainNamespace(socketio.AsyncNamespace):
         else:
             async with self.session(sid) as session:
                 session['user'] = user
-            squads = await get_user_squads(user)
-            await self.emit('select_squad', {'squads': squads}, room=sid)
-
-    @log_and_emit_error
-    async def on_select_squad(self, sid, message):
-        battle_types = await get_battle_types()
-        async with self.session(sid) as session:
-            session['squad'] = message['squad']
-        await self.emit('select_battle', {'battle_types': battle_types}, room=sid)
+            battle_types = await get_battle_types()
+            await self.emit('select_battle', {'battle_types': battle_types}, room=sid)
 
     @log_and_emit_error
     async def on_select_battle(self, sid, message):
-        room, battle, battle_type, map_ = await get_a_room(message['battle_type'])
         async with self.session(sid) as session:
             user = session['user']
-            session['room'] = room
-            squad = session['squad']
+            session['battle_type'] = message['battle_type']
+        tanks = await get_user_tanks(user)
+        await self.emit('select_tanks', {'tanks': tanks}, room=sid)
+
+    @log_and_emit_error
+    async def on_select_tanks(self, sid, message):
+        async with self.session(sid) as session:
+            user = session['user']
+            battle_type = session['battle_type']
+        room, battle, battle_type, map_ = await get_a_room(battle_type)
+        tanks = message['tanks'][:battle_type.player_tanks_number]
         self.enter_room(sid, room.name)
-        await add_user_to_room(room, user)
-        users = await get_room_user_names(room)
-        battle_data = await cache_get_async(f'battle_{battle.id}')
-        user_data = {'username': user.username, 'squad': squad, 'sid': sid}
-        if battle_data:
-            battle_data['users'].append(user_data)
+        game_id = f'{room.id}_{battle.id}'
+        if self.games.get(game_id):
+            game = self.games[game_id]
         else:
-            battle_data = {'battle': battle, 'state': 'waiting', 'users': [user_data]}
-        await cache_set_async(f'battle_{battle.id}', battle_data, 60*60)
+            game = Game(room, battle)
+            self.games[game.id] = game
+        await game.add_user(user, sid, tanks)
+        usernames = list(game.users.keys())
+
         await self.emit(
             'joined',
-            {'sid': sid, 'username': user.username, 'users': battle_data['users'], 'map': map_},
+            {'sid': sid, 'username': user.username, 'users': game.users, 'map': map_},
             room=room.name
         )
         async with self.session(sid) as session:
-            session['battle_id'] = battle.id
-        if len(users) == battle_type.players_number:
-            random.shuffle(users)
-            order = users
-            current_player = order[0]
-            battle_data['order'] = order
-            battle_data['current_player'] = current_player
-            battle_data['state'] = 'running'
-            await cache_set_async(f'battle_{battle.id}', battle_data, 60*60)
+            session['game_id'] = game.id
+        if len(usernames) == battle_type.players_number:
+            random.shuffle(usernames)
+            game.order = usernames
+            game.current_player = game.order[0]
+            game.state = game.STATE.RUNNING
             for i in range(5, 0, -1):
                 await asyncio.sleep(1)
                 await self.emit('start', {'t_minus': i}, room=room.name)
             await set_battle_status(battle, 'running')
-            await self.wait_next_move(current_player, room, battle.id)
+            await self.wait_next_move(game, game.current_player)
 
     @log_and_emit_error
     async def on_move(self, sid, message):
         async with self.session(sid) as session:
-            room = session['room']
-            battle_id = session['battle_id']
+            game_id = session['game_id']
             user = session['user']
-        battle_data = await cache_get_async(f'battle_{battle_id}')
-        if battle_data['current_player'] == user.username:
-            await self.emit('move', message, room=room.name)
+        game = self.games.get(game_id)
+        if game.current_player == user.username:
+            await self.emit('move', message, room=game.room.name)
 
     @log_and_emit_error
     async def on_shoot(self, sid, message):
         async with self.session(sid) as session:
-            room = session['room']
-            battle_id = session['battle_id']
+            game_id = session['game_id']
             user = session['user']
-        battle_data = await cache_get_async(f'battle_{battle_id}')
-        if battle_data['current_player'] == user.username:
-            await self.emit('shoot', message, room=room.name)
+        game = self.games.get(game_id)
+        if game.current_player == user.username:
+            await self.emit('shoot', message, room=game.room.name)
 
     @log_and_emit_error
     async def on_turn(self, sid, message):
         async with self.session(sid) as session:
-            room = session['room']
-            battle_id = session['battle_id']
+            game_id = session['game_id']
             user = session['user']
-        battle_data = await cache_get_async(f'battle_{battle_id}')
-        if battle_data['current_player'] == user.username:
-            await self.emit('turn', message, room=room.name)
-            battle_data = self.set_next_player(battle_data)
-            await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
+        game = self.games.get(game_id)
+        if game.current_player == user.username:
+            await self.emit('turn', message, room=game.room.name)
+            self.set_next_player(game)
 
     @log_and_emit_error
     async def on_lose(self, sid, message):
         async with self.session(sid) as session:
             user = session['user']
-            room = session.get('room')
-            battle_id = session.get('battle_id')
-        battle_data = await cache_get_async(f'battle_{battle_id}')
-        await self.emit('lose', message, room=room.name)
+            game_id = session.get('game_id')
+        game = self.games.get(game_id)
+        await self.emit('lose', message, room=game.room.name)
         looser = user.username
-        order = battle_data['order']
-        order.pop(order.index(looser))
-        battle_data['order'] = order
-        await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
-        if len(order) == 1:
-            await self.finish_game(battle_data, room)
+        game.order.pop(game.order.index(looser))
+        if len(game.order) == 1:
+            await self.finish_game(game)
 
     @log_and_emit_error
     async def on_disconnect(self, sid):
         async with self.session(sid) as session:
-            room = session.get('room')
             user = session.get('user')
-            battle_id = session.get('battle_id')
-        if room:
-            self.leave_room(sid, room.name)
-            await remove_user_from_room(room, user)
-            users = await get_room_user_names(room)
-            await self.emit('left', {'sid': sid, 'username': user.username, 'users': users}, room=room.name)
-            if battle_id:
-                battle_data = await cache_get_async(f'battle_{battle_id}')
-                order = battle_data.get('order')
-                if order:
-                    order.pop(order.index(user.username))
-                    battle_data['order'] = order
-                battle_data['users'] = list(filter(lambda x: x['username'] != user.username, battle_data['users']))
-                if battle_data['state'] == 'running' and len(users) == 1:
-                    await self.finish_game(battle_data, room)
-                await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
+            game_id = session.get('game_id')
+        game = self.games.get(game_id)
+        if game:
+            self.leave_room(sid, game.room.name)
+            await game.remove_user(user)
+            usernames = list(game.users.keys())
+            await self.emit('left', {'sid': sid, 'username': user.username, 'users': usernames}, room=game.room.name)
+            if game.order:
+                game.order.pop(game.order.index(user.username))
+            if game.state == Game.STATE.RUNNING and len(usernames) == 1:
+                await self.finish_game(game)
         await self.disconnect(sid)
 
     @log_and_emit_error
     async def on_room_message(self, sid, message):
         async with self.session(sid) as session:
-            room = session['room']
+            game_id = session['game_id']
             user = session['user']
-        await self.emit('room_message', {'text': message['text'], 'from': user.username}, room=room.name)
+        game = self.games.get(game_id)
+        await self.emit('room_message', {'text': message['text'], 'from': user.username}, room=game.room.name)
 
-    async def wait_next_move(self, current_player, room, battle_id):
-        await asyncio.sleep(2)
+    async def wait_next_move(self, game, current_player):
+        player = current_player
+        await asyncio.sleep(1)
         for i in range(30, 0, -1):
             await asyncio.sleep(1)
-            battle_data = await cache_get_async(f'battle_{battle_id}')
-            if battle_data['state'] == 'running':
-                if battle_data['current_player'] == current_player:
+            if game.state == 'running':
+                if game.current_player == player:
                     await self.emit('make_move', {'current_player': current_player, 't_minus': i}, room=room.name)
                 else:
-                    return await self.wait_next_move(battle_data['current_player'], room, battle_id)
-        battle_data = await cache_get_async(f'battle_{battle_id}')
-        if battle_data['current_player'] == current_player and battle_data['state'] == 'running':
-            battle_data = self.set_next_player(battle_data)
-            await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
-            await self.wait_next_move(battle_data['current_player'], room, battle_id)
+                    return await self.wait_next_move(game, game.current_player)
+        if game.current_player == player and game.state == 'running':
+            self.set_next_player(game)
+            await self.wait_next_move(game, game.current_player)
 
-    async def finish_game(self, battle_data, room):
-        await set_battle_status(battle_data['battle'], 'finished')
-        winner = battle_data['order'][0]
-        await set_battle_winner(battle_data['battle'], winner)
-        battle_data['state'] = 'finished'
-        await cache_set_async(f"battle_{battle_data['battle'].id}", battle_data, 60 * 60)
-        await self.emit('win', {'winner': winner}, room=room.name)
-        await self.close_room(room.name)
-        for u in battle_data['users']:
+    async def finish_game(self, game):
+        await set_battle_status(game.battle, 'finished')
+        winner = game.order[0]
+        await set_battle_winner(game.battle, winner)
+        game.state = Game.STATE.FINISHED
+        await self.emit('win', {'winner': winner}, room=game.room.name)
+        await self.close_room(game.room.name)
+        for u in game.users.values():
             await self.disconnect(u['sid'])
-        await clear_room(room)
+        await clear_room(game.room)
 
     @staticmethod
-    def set_next_player(battle_data):
-        cur_index = battle_data['order'].index(battle_data['current_player'])
-        current_player = battle_data['order'][cur_index - 1]
-        battle_data['current_player'] = current_player
-        return battle_data
+    def set_next_player(game):
+        cur_index = game.order.index(game.current_player)
+        current_player = game.order[cur_index - 1]
+        game.current_player = current_player
 
 
 sio.register_namespace(MainNamespace('/'))

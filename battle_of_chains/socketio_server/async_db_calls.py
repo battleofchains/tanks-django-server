@@ -10,7 +10,7 @@ from battle_of_chains.battle.models import Battle, BattleType, Map, Squad
 from battle_of_chains.battle.serializers import (
     BattleTypeSerializer,
     MapSerializer,
-    SquadSerializer,
+    TankSerializer,
 )
 
 from .models import Room
@@ -29,8 +29,8 @@ def get_battle_types():
 
 
 @database_sync_to_async
-def get_user_squads(user):
-    return SquadSerializer(Squad.objects.filter(owner=user), many=True).data
+def get_user_tanks(user):
+    return TankSerializer(Squad.objects.filter(owner=user), many=True).data
 
 
 @database_sync_to_async

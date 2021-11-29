@@ -12,7 +12,7 @@ class MapAdmin(admin.ModelAdmin):
 
 @admin.register(BattleType)
 class BattleTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'players_number')
+    list_display = ('name', 'players_number', 'player_tanks_number')
 
 
 @admin.register(Battle)
@@ -21,7 +21,7 @@ class BattleAdmin(AdminNoChangeMixin, admin.ModelAdmin):
 
 
 @admin.register(Squad)
-class SquadAdmin(AdminNoChangeMixin, admin.ModelAdmin):
+class SquadAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'owner')
 
 

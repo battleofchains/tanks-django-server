@@ -23,6 +23,7 @@ class Map(models.Model):
 class BattleType(models.Model):
     name = models.CharField(max_length=30, primary_key=True)
     players_number = models.PositiveSmallIntegerField()
+    player_tanks_number = models.PositiveSmallIntegerField(default=3)
 
     def __str__(self):
         return self.name
