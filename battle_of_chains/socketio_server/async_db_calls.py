@@ -81,10 +81,11 @@ def set_battle_status(battle, status):
 
 
 @database_sync_to_async
-def set_battle_winner(battle, winner):
+def set_battle_winner(battle, winner, duration):
     winner = User.objects.get(username=winner)
     battle.winner = winner
-    battle.save(update_fields=['winner'])
+    battle.duration = duration
+    battle.save(update_fields=['winner', 'duration'])
 
 
 @sync_to_async

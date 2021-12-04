@@ -1,5 +1,5 @@
 import asyncio
-import random
+import time
 import traceback
 from functools import wraps
 
@@ -80,16 +80,13 @@ class MainNamespace(socketio.AsyncNamespace):
 
         await self.emit(
             'joined',
-            {'sid': sid, 'username': user.username, 'users': game.users, 'map': map_},
+            {'sid': sid, 'username': user.username, 'users': usernames, 'map': map_},
             room=room.name
         )
         async with self.session(sid) as session:
             session['game_id'] = game.id
         if len(usernames) == battle_type.players_number:
-            random.shuffle(usernames)
-            game.order = usernames
-            game.current_player = game.order[0]
-            game.state = game.STATE.RUNNING
+            await game.start()
             for i in range(5, 0, -1):
                 await asyncio.sleep(1)
                 await self.emit('start', {'t_minus': i}, room=room.name)
@@ -168,7 +165,7 @@ class MainNamespace(socketio.AsyncNamespace):
             await asyncio.sleep(1)
             if game.state == 'running':
                 if game.current_player == player:
-                    await self.emit('make_move', {'current_player': current_player, 't_minus': i}, room=room.name)
+                    await self.emit('make_move', {'current_player': current_player, 't_minus': i}, room=game.room.name)
                 else:
                     return await self.wait_next_move(game, game.current_player)
         if game.current_player == player and game.state == 'running':
@@ -178,13 +175,18 @@ class MainNamespace(socketio.AsyncNamespace):
     async def finish_game(self, game):
         await set_battle_status(game.battle, 'finished')
         winner = game.order[0]
-        await set_battle_winner(game.battle, winner)
+        duration = time.time() - game.started
+        await set_battle_winner(game.battle, winner, duration)
         game.state = Game.STATE.FINISHED
         await self.emit('win', {'winner': winner}, room=game.room.name)
         await self.close_room(game.room.name)
-        for u in game.users.values():
+        for u in list(game.users.values()):
             await self.disconnect(u['sid'])
         await clear_room(game.room)
+        try:
+            del self.games[game.id]
+        except KeyError:
+            pass
 
     @staticmethod
     def set_next_player(game):
