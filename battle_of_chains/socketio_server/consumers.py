@@ -166,7 +166,6 @@ class MainNamespace(socketio.AsyncNamespace):
         await self.emit('room_message', {'text': message['text'], 'from': user.username}, room=room.name)
 
     async def wait_next_move(self, current_player, room, battle_id):
-        await asyncio.sleep(2)
         for i in range(30, 0, -1):
             await asyncio.sleep(1)
             battle_data = await cache_get_async(f'battle_{battle_id}')
@@ -177,6 +176,7 @@ class MainNamespace(socketio.AsyncNamespace):
                     return await self.wait_next_move(battle_data['current_player'], room, battle_id)
         battle_data = await cache_get_async(f'battle_{battle_id}')
         if battle_data['current_player'] == current_player and battle_data['state'] == 'running':
+            await self.emit('turn', {"username": current_player}, room=room.name)
             battle_data = self.set_next_player(battle_data)
             await cache_set_async(f'battle_{battle_id}', battle_data, 60 * 60)
             await self.wait_next_move(battle_data['current_player'], room, battle_id)
@@ -187,7 +187,7 @@ class MainNamespace(socketio.AsyncNamespace):
         await set_battle_winner(battle_data['battle'], winner)
         battle_data['state'] = 'finished'
         await cache_set_async(f"battle_{battle_data['battle'].id}", battle_data, 60 * 60)
-        await self.emit('win', {'winner': winner}, room=room.name)
+        await self.emit('win', {'username': winner}, room=room.name)
         await self.close_room(room.name)
         for u in battle_data['users']:
             await self.disconnect(u['sid'])
