@@ -3,6 +3,11 @@ version: '3'
 volumes:
   local_postgres_data: {}
   local_postgres_data_backups: {}
+  elasticsearch: {}
+
+networks:
+  tanks:
+    driver: bridge
 
 services:
   django: &django
@@ -15,6 +20,8 @@ services:
       - postgres
     volumes:
       - .:/app:z
+    networks:
+      - tanks
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
@@ -31,12 +38,70 @@ services:
     volumes:
       - local_postgres_data:/var/lib/postgresql/data:Z
       - local_postgres_data_backups:/backups:z
+    networks:
+      - tanks
     env_file:
       - ./.envs/.local/.postgres
 
   redis:
     image: redis:6
     container_name: redis
+    networks:
+      - tanks
+
+  elasticsearch:
+    build:
+      context: ./compose/local/elk/elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./compose/local/elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,z
+      - elasticsearch:/usr/share/elasticsearch/data:z
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+    networks:
+      - tanks
+
+  logstash:
+    build:
+      context: ./compose/local/elk/logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./compose/local/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,z
+      - ./compose/local/elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,z
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - tanks
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: ./compose/local/elk/kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./compose/local/elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,z
+    ports:
+      - "5601:5601"
+    networks:
+      - tanks
+    depends_on:
+      - elasticsearch
 
 #  celeryworker:
 #    <<: *django

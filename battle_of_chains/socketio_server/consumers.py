@@ -1,10 +1,11 @@
 import asyncio
+import json
+import logging
 import time
 import traceback
 from functools import wraps
 
 import socketio
-from loguru import logger
 
 from .async_db_calls import (
     clear_room,
@@ -15,6 +16,8 @@ from .async_db_calls import (
     set_battle_winner,
 )
 from .game import Game
+
+logger = logging.getLogger(__name__)
 
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
@@ -45,21 +48,31 @@ class MainNamespace(socketio.AsyncNamespace):
     @log_and_emit_error
     async def on_connect(self, sid, environ):
         user = environ.get('asgi.scope', {}).get('user')
+        log_msg = {"from": "client", "event": "connect", "sid": sid, "user_id": user.id or 0}
+        logger.info(f'{json.dumps(log_msg)}')
         if user.is_anonymous:
             await self.disconnect(sid)
         else:
             async with self.session(sid) as session:
                 session['user'] = user
             battle_types = await get_battle_types()
-            await self.emit('select_battle', {'battle_types': battle_types}, room=sid)
+            msg = {'battle_types': battle_types}
+            await self.emit('select_battle', msg, room=sid)
+            log_msg = {"from": "server", "event": "select_battle", "sid": sid, "user_id": user.id, "msg": msg}
+            logger.info(f'{json.dumps(log_msg)}')
 
     @log_and_emit_error
     async def on_select_battle(self, sid, message):
         async with self.session(sid) as session:
             user = session['user']
             session['battle_type'] = message['battle_type']
+        log_msg = {"from": "client", "event": "select_battle", "sid": sid, "user_id": user.id, "msg": message}
+        logger.info(f'{json.dumps(log_msg)}')
         tanks = await get_user_tanks(user)
-        await self.emit('select_tanks', {'tanks': tanks}, room=sid)
+        msg = {'tanks': tanks}
+        await self.emit('select_tanks', msg, room=sid)
+        log_msg = {"from": "server", "event": "select_tanks", "sid": sid, "user_id": user.id, "msg": msg}
+        logger.info(f'{json.dumps(log_msg)}')
 
     @log_and_emit_error
     async def on_select_tanks(self, sid, message):

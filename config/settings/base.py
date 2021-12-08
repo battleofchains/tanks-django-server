@@ -261,9 +261,18 @@ LOGGING = {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+        },
+        'logstash': {
+            'level': 'INFO',
+            'class': 'logstash.TCPLogstashHandler',
+            'host': 'logstash',   # IP/name of our Logstash instance
+            'port': 5000,
+            'version': 1,
+            'message_type': 'logstash',
+            'fqdn': False,
         }
     },
-    "root": {"level": "INFO", "handlers": ["console"]},
+    "root": {"level": "INFO", "handlers": ["console", "logstash"]},
 }
 
 # Celery
