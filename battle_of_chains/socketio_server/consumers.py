@@ -173,7 +173,6 @@ class MainNamespace(socketio.AsyncNamespace):
 
     async def wait_next_move(self, game, current_player):
         player = current_player
-        await asyncio.sleep(1)
         for i in range(30, 0, -1):
             await asyncio.sleep(1)
             if game.state == 'running':
@@ -182,6 +181,7 @@ class MainNamespace(socketio.AsyncNamespace):
                 else:
                     return await self.wait_next_move(game, game.current_player)
         if game.current_player == player and game.state == 'running':
+            await self.emit('turn', {"username": player}, room=game.room.name)
             self.set_next_player(game)
             await self.wait_next_move(game, game.current_player)
 
