@@ -20,11 +20,6 @@ class BattleAdmin(AdminNoChangeMixin, admin.ModelAdmin):
     list_display = ('id', 'map', 'created', 'status')
 
 
-@admin.register(Squad)
-class SquadAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'owner')
-
-
 @admin.register(TankType)
 class TankTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')

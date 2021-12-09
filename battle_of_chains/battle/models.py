@@ -53,14 +53,6 @@ class Battle(models.Model):
         return f'Battle {self.pk}'
 
 
-class Squad(models.Model):
-    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='squads')
-    name = models.CharField(max_length=255, default='My super squad')
-
-    def __str__(self):
-        return self.name
-
-
 class TankType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     hp_step = models.PositiveSmallIntegerField(default=100)
@@ -85,7 +77,6 @@ class Tank(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='tanks')
-    squad = models.ForeignKey(Squad, on_delete=models.SET_NULL, blank=True, null=True, related_name='tanks')
     hp = models.PositiveIntegerField(default=100)
     action_points = models.PositiveIntegerField(default=100)
     moving_points = models.PositiveIntegerField(default=100)

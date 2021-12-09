@@ -4,8 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from battle_of_chains.users.forms import UserChangeForm, UserCreationForm
-
-from .signals import generate_first_squad
+from battle_of_chains.utils.functions import generate_first_squad
 
 User = get_user_model()
 

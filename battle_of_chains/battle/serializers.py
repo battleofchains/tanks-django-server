@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import BattleType, Map, Projectile, ProjectileType, Squad, Tank, TankType
+from .models import BattleType, Map, Projectile, ProjectileType, Tank, TankType
 
 
 class MapSerializer(serializers.ModelSerializer):
@@ -27,15 +27,6 @@ class TankSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tank
         fields = '__all__'
-        read_only_fields = ['owner']
-
-
-class SquadSerializer(serializers.ModelSerializer):
-    tanks = TankSerializer(many=True, required=False)
-
-    class Meta:
-        model = Squad
-        fields = ('id', 'name', 'tanks')
         read_only_fields = ['owner']
 
 
