@@ -32,11 +32,14 @@ def log_and_emit_error(function):
             return await function(*args, **kwargs)
         except Exception as e:
             tb = traceback.format_exc()
-            err = f"Exception in {function.__name__}. Error: {e}. Traceback: {tb}"
-            logger.error(err)
+            logger.error(json.dumps({'func': function.__name__, 'err': str(e), 'traceback': tb}))
             await self.emit('error', {'error': str(e), 'traceback': tb}, room=sid)
             raise e
     return wrapper
+
+
+def log_json_info(**kwargs):
+    logger.info(json.dumps(kwargs))
 
 
 class MainNamespace(socketio.AsyncNamespace):
@@ -48,8 +51,7 @@ class MainNamespace(socketio.AsyncNamespace):
     @log_and_emit_error
     async def on_connect(self, sid, environ):
         user = environ.get('asgi.scope', {}).get('user')
-        log_msg = {"from": "client", "event": "connect", "sid": sid, "user_id": user.id or 0}
-        logger.info(f'{json.dumps(log_msg)}')
+        log_json_info(event_source="client", event="connect", sid=sid, user_id=user.id or 0)
         if user.is_anonymous:
             await self.disconnect(sid)
         else:
@@ -58,27 +60,25 @@ class MainNamespace(socketio.AsyncNamespace):
             battle_types = await get_battle_types()
             msg = {'battle_types': battle_types}
             await self.emit('select_battle', msg, room=sid)
-            log_msg = {"from": "server", "event": "select_battle", "sid": sid, "user_id": user.id, "msg": msg}
-            logger.info(f'{json.dumps(log_msg)}')
+            log_json_info(event_source='server', event='select_battle', sid=sid, user_id=user.id, msg=msg)
 
     @log_and_emit_error
     async def on_select_battle(self, sid, message):
         async with self.session(sid) as session:
             user = session['user']
             session['battle_type'] = message['battle_type']
-        log_msg = {"from": "client", "event": "select_battle", "sid": sid, "user_id": user.id, "msg": message}
-        logger.info(f'{json.dumps(log_msg)}')
+        log_json_info(event_source='client', event='select_battle', sid=sid, user_id=user.id, msg=message)
         tanks = await get_user_tanks(user)
         msg = {'tanks': tanks}
         await self.emit('select_tanks', msg, room=sid)
-        log_msg = {"from": "server", "event": "select_tanks", "sid": sid, "user_id": user.id, "msg": msg}
-        logger.info(f'{json.dumps(log_msg)}')
+        log_json_info(event_source='server', event='select_tanks', sid=sid, user_id=user.id, msg=msg)
 
     @log_and_emit_error
     async def on_select_tanks(self, sid, message):
         async with self.session(sid) as session:
             user = session['user']
             battle_type = session['battle_type']
+        log_json_info(event_source='client', event='select_tanks', sid=sid, user_id=user.id, msg=message)
         room, battle, battle_type, map_ = await get_a_room(battle_type)
         tanks = message['tanks'][:battle_type.player_tanks_number]
         self.enter_room(sid, room.name)
@@ -91,11 +91,10 @@ class MainNamespace(socketio.AsyncNamespace):
         await game.add_user(user, sid, tanks)
         usernames = list(game.users.keys())
 
-        await self.emit(
-            'joined',
-            {'sid': sid, 'username': user.username, 'users': usernames, 'map': map_},
-            room=room.name
-        )
+        msg = {'sid': sid, 'username': user.username, 'users': usernames, 'map': map_}
+        await self.emit('joined', msg, room=room.name)
+        log_json_info(event_source='server', event='joined', sid=sid,
+                      user_id=user.id, msg=msg, room=room.name, battle=battle.id)
         async with self.session(sid) as session:
             session['game_id'] = game.id
         if len(usernames) == battle_type.players_number:
@@ -103,6 +102,8 @@ class MainNamespace(socketio.AsyncNamespace):
             for i in range(5, 0, -1):
                 await asyncio.sleep(1)
                 await self.emit('start', {'t_minus': i}, room=room.name)
+                log_json_info(event_source='server', event='start', sid=sid,
+                              user_id=user.id, msg={'t_minus': i}, room=room.name, battle=battle.id)
             await set_battle_status(battle, 'running')
             await self.wait_next_move(game, game.current_player)
 
@@ -112,8 +113,12 @@ class MainNamespace(socketio.AsyncNamespace):
             game_id = session['game_id']
             user = session['user']
         game = self.games.get(game_id)
+        log_json_info(event_source='client', event='move', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
         if game.current_player == user.username:
             await self.emit('move', message, room=game.room.name)
+            log_json_info(event_source='server', event='move', sid=sid, user_id=user.id,
+                          msg=message, room=game.room.name, battle=game.battle.id)
 
     @log_and_emit_error
     async def on_shoot(self, sid, message):
@@ -121,8 +126,12 @@ class MainNamespace(socketio.AsyncNamespace):
             game_id = session['game_id']
             user = session['user']
         game = self.games.get(game_id)
+        log_json_info(event_source='client', event='shoot', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
         if game.current_player == user.username:
             await self.emit('shoot', message, room=game.room.name)
+            log_json_info(event_source='server', event='shoot', sid=sid, user_id=user.id,
+                          msg=message, room=game.room.name, battle=game.battle.id)
 
     @log_and_emit_error
     async def on_turn(self, sid, message):
@@ -130,8 +139,12 @@ class MainNamespace(socketio.AsyncNamespace):
             game_id = session['game_id']
             user = session['user']
         game = self.games.get(game_id)
+        log_json_info(event_source='client', event='turn', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
         if game.current_player == user.username:
             await self.emit('turn', message, room=game.room.name)
+            log_json_info(event_source='server', event='turn', sid=sid, user_id=user.id,
+                          msg=message, room=game.room.name, battle=game.battle.id)
             self.set_next_player(game)
 
     @log_and_emit_error
@@ -140,7 +153,11 @@ class MainNamespace(socketio.AsyncNamespace):
             user = session['user']
             game_id = session.get('game_id')
         game = self.games.get(game_id)
+        log_json_info(event_source='client', event='lose', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
         await self.emit('lose', message, room=game.room.name)
+        log_json_info(event_source='server', event='lose', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
         looser = user.username
         game.order.pop(game.order.index(looser))
         if len(game.order) == 1:
@@ -152,11 +169,15 @@ class MainNamespace(socketio.AsyncNamespace):
             user = session.get('user')
             game_id = session.get('game_id')
         game = self.games.get(game_id)
+        log_json_info(event_source='client', event='disconnect', sid=sid, user_id=user.id)
         if game:
             self.leave_room(sid, game.room.name)
             await game.remove_user(user)
             usernames = list(game.users.keys())
-            await self.emit('left', {'sid': sid, 'username': user.username, 'users': usernames}, room=game.room.name)
+            message = {'sid': sid, 'username': user.username, 'users': usernames}
+            await self.emit('left', message, room=game.room.name)
+            log_json_info(event_source='server', event='left', sid=sid, user_id=user.id,
+                          msg=message, room=game.room.name, battle=game.battle.id)
             if game.order:
                 game.order.pop(game.order.index(user.username))
             if game.state == Game.STATE.RUNNING and len(usernames) == 1:
@@ -169,7 +190,11 @@ class MainNamespace(socketio.AsyncNamespace):
             game_id = session['game_id']
             user = session['user']
         game = self.games.get(game_id)
+        log_json_info(event_source='client', event='room_message', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
         await self.emit('room_message', {'text': message['text'], 'from': user.username}, room=game.room.name)
+        log_json_info(event_source='server', event='room_message', sid=sid, user_id=user.id,
+                      msg=message, room=game.room.name, battle=game.battle.id)
 
     async def wait_next_move(self, game, current_player):
         player = current_player
@@ -177,11 +202,16 @@ class MainNamespace(socketio.AsyncNamespace):
             await asyncio.sleep(1)
             if game.state == 'running':
                 if game.current_player == player:
-                    await self.emit('make_move', {'current_player': current_player, 't_minus': i}, room=game.room.name)
+                    message = {'current_player': current_player, 't_minus': i}
+                    await self.emit('make_move', message, room=game.room.name)
+                    log_json_info(event_source='server', event='make_move', msg=message,
+                                  room=game.room.name, battle=game.battle.id)
                 else:
                     return await self.wait_next_move(game, game.current_player)
         if game.current_player == player and game.state == 'running':
             await self.emit('turn', {"username": player}, room=game.room.name)
+            log_json_info(event_source='server', event='turn', msg={"username": player},
+                          room=game.room.name, battle=game.battle.id)
             self.set_next_player(game)
             await self.wait_next_move(game, game.current_player)
 
@@ -192,6 +222,8 @@ class MainNamespace(socketio.AsyncNamespace):
         await set_battle_winner(game.battle, winner, duration)
         game.state = Game.STATE.FINISHED
         await self.emit('win', {'winner': winner}, room=game.room.name)
+        log_json_info(event_source='server', event='win', msg={'winner': winner},
+                      room=game.room.name, battle=game.battle.id)
         await self.close_room(game.room.name)
         for u in list(game.users.values()):
             await self.disconnect(u['sid'])
