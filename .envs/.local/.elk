@@ -1,0 +1,5 @@
+ELK_VERSION=7.15.2
+ELASTIC_PASSWORD=awesome_game_logs
+ES_JAVA_OPTS="-Xmx256m -Xms256m"
+LS_JAVA_OPTS="-Xmx256m -Xms256m"
+discovery.type=single-node

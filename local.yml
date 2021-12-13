@@ -60,12 +60,8 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      ELASTIC_PASSWORD: changeme
-      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
-      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
-      discovery.type: single-node
+    env_file:
+      - ./.envs/.local/.elk
     networks:
       - tanks
 
@@ -82,8 +78,8 @@ services:
       - "5000:5000/tcp"
       - "5000:5000/udp"
       - "9600:9600"
-    environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    env_file:
+      - ./.envs/.local/.elk
     networks:
       - tanks
     depends_on:
@@ -98,6 +94,8 @@ services:
       - ./compose/local/elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,z
     ports:
       - "5601:5601"
+    env_file:
+      - ./.envs/.local/.elk
     networks:
       - tanks
     depends_on:
