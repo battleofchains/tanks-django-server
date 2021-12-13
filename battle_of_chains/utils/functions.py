@@ -25,7 +25,7 @@ def generate_first_squad(instance: User):
 
         p_types = tuple(projectile_types.filter(tank_types=tank_type))
         for projectile_type in p_types:
-            Projectile.objects.create(owner=instance, type=projectile_type, tank=tank,
+            Projectile.objects.create(type=projectile_type, tank=tank,
                                       avg_damage=projectile_type.avg_damage_default,
                                       ricochet_chance=projectile_type.ricochet_chance_default,
                                       distance=projectile_type.distance_default,

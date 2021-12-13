@@ -93,7 +93,8 @@ class Tank(models.Model):
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
 
     def __str__(self):
-        return self.name if self.name else f'{self.type.name} {self.pk}'
+        return f"{self.owner.username} | {self.name}" if self.name \
+            else f'{self.owner.username} | {self.type.name} {self.pk}'
 
     @property
     def max_hp(self):
@@ -120,14 +121,12 @@ class ProjectileType(models.Model):
 
 
 class Projectile(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True)
-    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='projectiles')
+    type = models.ForeignKey(ProjectileType, on_delete=models.PROTECT, related_name='projectiles')
     avg_damage = models.PositiveIntegerField(default=10)
     distance = models.PositiveSmallIntegerField(default=5)
     environment_damage = models.PositiveIntegerField(default=15)
     critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %',
                                                           validators=[MaxValueValidator(100)])
-    type = models.ForeignKey(ProjectileType, on_delete=models.PROTECT, related_name='projectiles')
     ammo = models.PositiveIntegerField(default=10)
     radius = models.PositiveSmallIntegerField(default=0)
     ricochet_chance = models.PositiveSmallIntegerField(default=1,
@@ -136,4 +135,4 @@ class Projectile(models.Model):
     tank = models.ForeignKey('Tank', on_delete=models.CASCADE, related_name='projectiles', null=True, blank=True)
 
     def __str__(self):
-        return self.name if self.name else f'{self.type.name} {self.pk}'
+        return f'{self.type.name} {self.pk}'

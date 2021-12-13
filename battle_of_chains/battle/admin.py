@@ -25,9 +25,15 @@ class TankTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
+class ProjectileInline(admin.TabularInline):
+    model = Projectile
+    extra = 0
+
+
 @admin.register(Tank)
 class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
+    inlines = [ProjectileInline]
 
 
 @admin.register(ProjectileType)
@@ -37,4 +43,4 @@ class ProjectileTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Projectile)
 class Projectile(admin.ModelAdmin):
-    list_display = ('id', 'name', 'type', 'owner', 'tank')
+    list_display = ('id', 'type', 'tank')
