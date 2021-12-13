@@ -10,7 +10,7 @@ def generate_first_squad(instance: User):
     if tank_types.count() == 0 or projectile_types.count() == 0:
         return
     tank_types = tuple(tank_types)
-    for i in range(5):
+    for i in range(3):
         tank_type = random.choice(tank_types)
         tank = Tank.objects.create(type=tank_type, owner=instance,
                                    hp=tank_type.hp_step,
