@@ -91,7 +91,7 @@ class MainNamespace(socketio.AsyncNamespace):
         await game.add_user(user, sid, tanks)
         usernames = list(game.users.keys())
 
-        msg = {'sid': sid, 'username': user.username, 'users': usernames, 'map': map_}
+        msg = {'sid': sid, 'username': user.username, 'users_data': game.users, 'map': map_, 'usernames': usernames}
         await self.emit('joined', msg, room=room.name)
         log_json_info(event_source='server', event='joined', sid=sid,
                       user_id=user.id, msg=msg, room=room.name, battle=battle.id)
@@ -174,7 +174,7 @@ class MainNamespace(socketio.AsyncNamespace):
             self.leave_room(sid, game.room.name)
             await game.remove_user(user)
             usernames = list(game.users.keys())
-            message = {'sid': sid, 'username': user.username, 'users': usernames}
+            message = {'sid': sid, 'username': user.username, 'usernames': usernames}
             await self.emit('left', message, room=game.room.name)
             log_json_info(event_source='server', event='left', sid=sid, user_id=user.id,
                           msg=message, room=game.room.name, battle=game.battle.id)

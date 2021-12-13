@@ -23,7 +23,7 @@ class Game:
         self.started = None
 
     async def add_user(self, user, sid, tanks):
-        self.users[user.username] = {'user': user, 'sid': sid, 'tanks': tanks}
+        self.users[user.username] = {'sid': sid, 'tanks': tanks}
         await add_user_to_room(self.room, user)
 
     async def remove_user(self, user):
