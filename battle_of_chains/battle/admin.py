@@ -12,7 +12,7 @@ class MapAdmin(admin.ModelAdmin):
 
 @admin.register(BattleType)
 class BattleTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'players_number')
+    list_display = ('name', 'players_number', 'player_tanks_number')
 
 
 @admin.register(Battle)
@@ -20,19 +20,20 @@ class BattleAdmin(AdminNoChangeMixin, admin.ModelAdmin):
     list_display = ('id', 'map', 'created', 'status')
 
 
-@admin.register(Squad)
-class SquadAdmin(AdminNoChangeMixin, admin.ModelAdmin):
-    list_display = ('id', 'name', 'owner')
-
-
 @admin.register(TankType)
 class TankTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
+class ProjectileInline(admin.TabularInline):
+    model = Projectile
+    extra = 0
+
+
 @admin.register(Tank)
 class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
+    inlines = [ProjectileInline]
 
 
 @admin.register(ProjectileType)
@@ -42,4 +43,4 @@ class ProjectileTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Projectile)
 class Projectile(admin.ModelAdmin):
-    list_display = ('id', 'name', 'type', 'owner', 'tank')
+    list_display = ('id', 'type', 'tank')

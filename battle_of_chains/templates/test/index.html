@@ -7,9 +7,9 @@
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
             const socket = io('ws://' + document.domain + ':' + location.port, {transports: ['websocket']});
-            socket.on('select_squad', function (msg) {
+            socket.on('select_tanks', function (msg) {
               console.log(msg)
-              socket.emit('select_squad', {'squad': msg.squads[0]});
+              socket.emit('select_tanks', {'tanks': msg.tanks});
             });
             socket.on('select_battle', function (msg) {
               msg.battle_types.forEach(function (val, i, arr) {

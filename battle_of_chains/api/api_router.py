@@ -5,7 +5,6 @@ from rest_framework.routers import DefaultRouter, SimpleRouter
 
 from battle_of_chains.api.views import (
     ProjectileViewSet,
-    SquadViewSet,
     TankViewSet,
     UserViewSet,
 )
@@ -17,7 +16,6 @@ else:
 
 router.register("users", UserViewSet)
 router.register("tanks", TankViewSet)
-router.register("squads", SquadViewSet)
 router.register("projectiles", ProjectileViewSet)
 
 

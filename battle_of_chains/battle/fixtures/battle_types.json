@@ -1,1 +1,23 @@
-[{"model": "battle.battletype", "pk": "pvp", "fields": {"players_number": 2}}, {"model": "battle.battletype", "pk": "royale", "fields": {"players_number": 4}}, {"model": "battle.battletype", "pk": "team", "fields": {"players_number": 4}}]
+[
+  {
+    "model": "battle.battletype",
+    "pk": "pvp",
+    "fields": {
+      "players_number": 2
+    }
+  },
+  {
+    "model": "battle.battletype",
+    "pk": "royale",
+    "fields": {
+      "players_number": 4
+    }
+  },
+  {
+    "model": "battle.battletype",
+    "pk": "team",
+    "fields": {
+      "players_number": 4
+    }
+  }
+]

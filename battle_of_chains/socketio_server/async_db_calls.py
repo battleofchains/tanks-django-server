@@ -6,11 +6,11 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db.models import Count
 
-from battle_of_chains.battle.models import Battle, BattleType, Map, Squad
+from battle_of_chains.battle.models import Battle, BattleType, Map, Tank
 from battle_of_chains.battle.serializers import (
     BattleTypeSerializer,
     MapSerializer,
-    SquadSerializer,
+    TankSerializer,
 )
 
 from .models import Room
@@ -29,8 +29,8 @@ def get_battle_types():
 
 
 @database_sync_to_async
-def get_user_squads(user):
-    return SquadSerializer(Squad.objects.filter(owner=user), many=True).data
+def get_user_tanks(user):
+    return TankSerializer(Tank.objects.filter(owner=user), many=True).data
 
 
 @database_sync_to_async
@@ -81,10 +81,11 @@ def set_battle_status(battle, status):
 
 
 @database_sync_to_async
-def set_battle_winner(battle, winner):
+def set_battle_winner(battle, winner, duration):
     winner = User.objects.get(username=winner)
     battle.winner = winner
-    battle.save(update_fields=['winner'])
+    battle.duration = duration
+    battle.save(update_fields=['winner', 'duration'])
 
 
 @sync_to_async
