@@ -40,6 +40,8 @@ class Game:
         random.shuffle(usernames)
         self.order = usernames
         uname = self.order[-1]
-        self.current_player = {'username': uname, 'tank': self.users[uname]['tanks_order'][-1]}
+        tank = self.users[uname]['tanks_order'][-1]
+        self.users[uname]['last_tank'] = tank
+        self.current_player = {'username': uname, 'tank': tank}
         self.state = Game.STATE.RUNNING
         self.started = time.time()
