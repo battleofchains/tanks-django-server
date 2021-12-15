@@ -48,4 +48,4 @@ class ProjectileViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, Ge
     queryset = Projectile.objects.all()
 
     def get_queryset(self, *args, **kwargs):
-        return self.queryset.filter(owner=self.request.user)
+        return self.queryset.filter(tank_id__in=self.request.user.tanks.values_list('id', flat=True))
