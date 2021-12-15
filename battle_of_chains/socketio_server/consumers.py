@@ -115,7 +115,7 @@ class MainNamespace(socketio.AsyncNamespace):
         game = self.games.get(game_id)
         log_json_info(event_source='client', event='move', sid=sid, user_id=user.id,
                       msg=message, room=game.room.name, battle=game.battle.id)
-        if game.current_player == user.username:
+        if game.current_player['username'] == user.username:
             await self.emit('move', message, room=game.room.name)
             log_json_info(event_source='server', event='move', sid=sid, user_id=user.id,
                           msg=message, room=game.room.name, battle=game.battle.id)
@@ -141,7 +141,7 @@ class MainNamespace(socketio.AsyncNamespace):
         game = self.games.get(game_id)
         log_json_info(event_source='client', event='turn', sid=sid, user_id=user.id,
                       msg=message, room=game.room.name, battle=game.battle.id)
-        if game.current_player == user.username:
+        if game.current_player['username'] == user.username:
             await self.emit('turn', message, room=game.room.name)
             log_json_info(event_source='server', event='turn', sid=sid, user_id=user.id,
                           msg=message, room=game.room.name, battle=game.battle.id)
@@ -197,18 +197,18 @@ class MainNamespace(socketio.AsyncNamespace):
                       msg=message, room=game.room.name, battle=game.battle.id)
 
     async def wait_next_move(self, game, current_player):
-        player = current_player
+        player = current_player['username']
         for i in range(30, 0, -1):
             await asyncio.sleep(1)
             if game.state == 'running':
-                if game.current_player == player:
+                if game.current_player['username'] == player:
                     message = {'current_player': current_player, 't_minus': i}
                     await self.emit('make_move', message, room=game.room.name)
                     log_json_info(event_source='server', event='make_move', msg=message,
                                   room=game.room.name, battle=game.battle.id)
                 else:
                     return await self.wait_next_move(game, game.current_player)
-        if game.current_player == player and game.state == 'running':
+        if game.current_player['username'] == player and game.state == 'running':
             await self.emit('turn', {"username": player}, room=game.room.name)
             log_json_info(event_source='server', event='turn', msg={"username": player},
                           room=game.room.name, battle=game.battle.id)
@@ -235,9 +235,17 @@ class MainNamespace(socketio.AsyncNamespace):
 
     @staticmethod
     def set_next_player(game):
-        cur_index = game.order.index(game.current_player)
+        cur_index = game.order.index(game.current_player['username'])
         current_player = game.order[cur_index - 1]
-        game.current_player = current_player
+        tanks_order = game.users[current_player]['tanks_order']
+        last_tank = game.users[current_player].get('last_tank')
+        if last_tank:
+            cur_tank_index = tanks_order.index(last_tank)
+            current_tank = tanks_order[cur_tank_index - 1]
+        else:
+            current_tank = tanks_order[-1]
+        game.users[current_player]['last_tank'] = current_tank
+        game.current_player = {'username': current_player, 'tank': current_tank}
 
 
 sio.register_namespace(MainNamespace('/'))

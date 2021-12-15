@@ -28,7 +28,8 @@
             });
             socket.on('make_move', function (msg) {
               console.log(msg);
-              $('#current_player').text(msg.current_player);
+              $('#current_player').text(msg.current_player.username);
+              $('#current_tank').text(msg.current_player.tank);
               $('#timer').text(msg.t_minus);
             });
             socket.on('move', function (msg) {
@@ -96,7 +97,7 @@
     <div><p id="chat"></p></div>
     <br>
     <h2>Start: <span id="start_timer"></span></h2>
-    <h2>Current Player: <span id="current_player"></span>. Timer: <span id="timer"></span></h2>
+    <h2>Current Player: <span id="current_player"></span> Tank: <span id="current_tank"></span>. Timer: <span id="timer"></span></h2>
     <h3>Winner: <span id="winner"></span></h3>
 </body>
 </html>

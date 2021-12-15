@@ -23,7 +23,9 @@ class Game:
         self.started = None
 
     async def add_user(self, user, sid, tanks):
-        self.users[user.username] = {'sid': sid, 'tanks': tanks}
+        tanks = sorted(tanks, key=lambda x: x['moving_price'])
+        tanks_order = [tank['id'] for tank in tanks[::-1]]
+        self.users[user.username] = {'sid': sid, 'tanks': tanks, 'tanks_order': tanks_order}
         await add_user_to_room(self.room, user)
 
     async def remove_user(self, user):
@@ -37,6 +39,7 @@ class Game:
         usernames = list(self.users.keys())
         random.shuffle(usernames)
         self.order = usernames
-        self.current_player = self.order[0]
+        uname = self.order[-1]
+        self.current_player = {'username': uname, 'tank': self.users[uname]['tanks_order'][-1]}
         self.state = Game.STATE.RUNNING
         self.started = time.time()

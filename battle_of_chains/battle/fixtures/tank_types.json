@@ -10,7 +10,8 @@
       "critical_chance_default": 1,
       "overlook_default": 3,
       "armor_default": 50,
-      "block_chance_default": 10
+      "block_chance_default": 10,
+      "moving_price_default": 3
     }
   },
   {
@@ -24,7 +25,8 @@
       "critical_chance_default": 1,
       "overlook_default": 3,
       "armor_default": 50,
-      "block_chance_default": 1
+      "block_chance_default": 1,
+      "moving_price_default": 1
     }
   },
   {
@@ -38,7 +40,8 @@
       "critical_chance_default": 10,
       "overlook_default": 3,
       "armor_default": 40,
-      "block_chance_default": 1
+      "block_chance_default": 1,
+      "moving_price_default": 4
     }
   }
 ]
