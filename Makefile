@@ -38,3 +38,6 @@ migrate:
 
 load_fixtures:
 	$(MANAGE) loaddata tank_types projectile_types maps battle_types --settings=config.settings.local
+
+test:
+	$(DJANGO) pytest

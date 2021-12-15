@@ -169,7 +169,7 @@ class MainNamespace(socketio.AsyncNamespace):
             user = session.get('user')
             game_id = session.get('game_id')
         game = self.games.get(game_id)
-        log_json_info(event_source='client', event='disconnect', sid=sid, user_id=user.id)
+        log_json_info(event_source='client', event='disconnect', sid=sid, user_id=user.id if user else 0)
         if game:
             self.leave_room(sid, game.room.name)
             await game.remove_user(user)

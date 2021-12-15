@@ -14,14 +14,12 @@ def generate_first_squad(instance: User):
         tank_type = random.choice(tank_types)
         tank = Tank.objects.create(type=tank_type, owner=instance,
                                    hp=tank_type.hp_step,
-                                   action_points=tank_type.action_points_default,
-                                   moving_points=tank_type.moving_points_default,
+                                   moving_price=tank_type.moving_price_default,
                                    damage_bonus=tank_type.damage_bonus_default,
                                    critical_chance=tank_type.critical_chance_default,
                                    overlook=tank_type.overlook_default,
                                    armor=tank_type.armor_default,
-                                   block_chance=tank_type.block_chance_default,
-                                   fuel=tank_type.fuel_default)
+                                   block_chance=tank_type.block_chance_default)
 
         p_types = tuple(projectile_types.filter(tank_types=tank_type))
         for projectile_type in p_types:
@@ -31,4 +29,5 @@ def generate_first_squad(instance: User):
                                       distance=projectile_type.distance_default,
                                       environment_damage=projectile_type.environment_damage_default,
                                       critical_hit_bonus=projectile_type.critical_hit_bonus_default,
-                                      radius=projectile_type.radius_default)
+                                      radius=projectile_type.radius_default,
+                                      fire_price=projectile_type.fire_price_default)

@@ -57,8 +57,7 @@ class TankType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     hp_step = models.PositiveSmallIntegerField(default=100)
     max_equipment = models.PositiveSmallIntegerField(default=1)
-    action_points_default = models.PositiveIntegerField(default=100)
-    moving_points_default = models.PositiveIntegerField(default=100)
+    moving_price_default = models.PositiveIntegerField(default=1)
     damage_bonus_default = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus default, %',
                                                             validators=[MaxValueValidator(100)])
     critical_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance default, %",
@@ -67,7 +66,6 @@ class TankType(models.Model):
     armor_default = models.PositiveSmallIntegerField(default=50)
     block_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block default, %',
                                                             validators=[MaxValueValidator(100)])
-    fuel_default = models.PositiveIntegerField(default=100)
 
     def __str__(self):
         return self.name
@@ -78,8 +76,7 @@ class Tank(models.Model):
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='tanks')
     hp = models.PositiveIntegerField(default=100)
-    action_points = models.PositiveIntegerField(default=100)
-    moving_points = models.PositiveIntegerField(default=100)
+    moving_price = models.PositiveIntegerField(default=1)
     damage_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus, %',
                                                     validators=[MaxValueValidator(100)])
     critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %",
@@ -88,7 +85,6 @@ class Tank(models.Model):
     armor = models.PositiveIntegerField(default=50)
     block_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block, %',
                                                     validators=[MaxValueValidator(100)])
-    fuel = models.PositiveIntegerField(default=100)
     level = models.PositiveIntegerField(default=1)
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
 
@@ -115,6 +111,7 @@ class ProjectileType(models.Model):
     ricochet_chance_default = models.PositiveSmallIntegerField(default=1,
                                                                verbose_name='Ricochet chance default, %',
                                                                validators=[MaxValueValidator(100)])
+    fire_price_default = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -133,6 +130,7 @@ class Projectile(models.Model):
                                                        verbose_name='Ricochet chance, %',
                                                        validators=[MaxValueValidator(100)])
     tank = models.ForeignKey('Tank', on_delete=models.CASCADE, related_name='projectiles', null=True, blank=True)
+    fire_price = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return f'{self.type.name} {self.pk}'
