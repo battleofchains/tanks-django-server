@@ -35,6 +35,9 @@
             socket.on('move', function (msg) {
               console.log(msg);
             });
+            socket.on('shoot', function (msg) {
+              console.log(msg);
+            });
             socket.on('lose', function (msg) {
               console.log(msg);
             });
@@ -54,6 +57,10 @@
             });
             $('form#move').submit(function(event) {
                 socket.emit('move', {"user": socket.id, "data": $('#move_data').val()});
+                return false;
+            });
+            $('form#shoot').submit(function(event) {
+                socket.emit('shoot', {"user": socket.id, "data": $('#shoot_data').val()});
                 return false;
             });
             $('form#turn').submit(function(event) {
@@ -85,6 +92,10 @@
     <form id="move" action="#">{% csrf_token %}
         <input type="text" name="move_data" id="move_data" placeholder="Move">
         <input type="submit" value="Move">
+    </form>
+    <form id="shoot" action="#">{% csrf_token %}
+        <input type="text" name="shoot_data" id="shoot_data" placeholder="shoot">
+        <input type="submit" value="shoot">
     </form>
     <form id="turn" action="#">{% csrf_token %}
         <input type="text" name="turn_data" id="turn_data" placeholder="Turn">

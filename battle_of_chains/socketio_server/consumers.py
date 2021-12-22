@@ -128,7 +128,7 @@ class MainNamespace(socketio.AsyncNamespace):
         game = self.games.get(game_id)
         log_json_info(event_source='client', event='shoot', sid=sid, user_id=user.id,
                       msg=message, room=game.room.name, battle=game.battle.id)
-        if game.current_player == user.username:
+        if game.current_player['username'] == user.username:
             await self.emit('shoot', message, room=game.room.name)
             log_json_info(event_source='server', event='shoot', sid=sid, user_id=user.id,
                           msg=message, room=game.room.name, battle=game.battle.id)
