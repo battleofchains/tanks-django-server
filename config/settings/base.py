@@ -325,5 +325,8 @@ REST_FRAMEWORK = {
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 # CORS_URLS_REGEX = r"^/api/.*$"
-# Your stuff...
-# ------------------------------------------------------------------------------
+
+CONTRACTS_OWNER = {
+    'address': env.str('CONTRACTS_OWNER_ADDRESS'),
+    'secret': env.str('CONTRACTS_OWNER_SECRET')
+}

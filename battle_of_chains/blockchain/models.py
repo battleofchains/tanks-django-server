@@ -12,8 +12,34 @@ class Wallet(models.Model):
         return self.address
 
 
+class Network(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Name')
+    code = models.CharField(max_length=50, verbose_name='Code', default='')
+    rpc_url = models.URLField(verbose_name='RPC URL')
+    url_explorer = models.URLField(verbose_name='URL Explorer')
+
+    def __str__(self):
+        return self.name
+
+
+class Contract(models.Model):
+    name = models.CharField(max_length=100)
+    symbol = models.CharField(max_length=50, default='')
+    address = models.CharField(max_length=42, verbose_name='Contract address', blank=True, null=True)
+    contract_url = models.URLField(verbose_name='Contract URL', blank=True, null=True)
+    network = models.OneToOneField(Network, on_delete=models.PROTECT)
+    deployed = models.BooleanField(default=False, verbose_name='Contract Deployed')
+    date_add = models.DateTimeField(auto_now_add=True, verbose_name='Creation date')
+    last_modified = models.DateTimeField(auto_now=True, verbose_name='Last update')
+
+    def __str__(self):
+        return self.name
+
+
 class NFT(models.Model):
     address = models.CharField(max_length=50, primary_key=True)
     tank = models.OneToOneField(Tank, on_delete=models.SET_NULL, null=True)
-    for_sale = models.BooleanField(default=False)
-    price = models.DecimalField(max_digits=15, decimal_places=6)
+    contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return 'NFT' + self.tank.name

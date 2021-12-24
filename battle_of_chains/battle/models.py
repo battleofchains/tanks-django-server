@@ -87,6 +87,8 @@ class Tank(models.Model):
                                                     validators=[MaxValueValidator(100)])
     level = models.PositiveIntegerField(default=1)
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
+    for_sale = models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
 
     def __str__(self):
         return f"{self.owner.username} | {self.name}" if self.name \
