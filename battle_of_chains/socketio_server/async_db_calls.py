@@ -39,14 +39,13 @@ def get_a_room(battle_type):
     available_rooms = Room.objects.annotate(users_count=Count('users'))\
         .filter(users_count__lt=b_type.players_number, battle__type=b_type,
                 battle__status__in=[Battle.STATUS.WAITING, Battle.STATUS.FINISHED])
+    map_ = random.choice(Map.objects.filter(is_active=True))
     if available_rooms.count() == 0:
-        map_ = random.choice(Map.objects.all())
         battle = Battle.objects.create(map=map_, type=b_type)
         room = Room.objects.create(battle=battle)
         return room, room.battle, room.battle.type, MapSerializer(room.battle.map).data
     room = available_rooms.first()
     if room.battle.status == Battle.STATUS.FINISHED:
-        map_ = random.choice(Map.objects.all())
         battle = Battle.objects.create(map=map_, type=b_type)
         room.battle = battle
         room.save()
