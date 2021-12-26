@@ -31,6 +31,12 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', "email", 'password1', 'password2'),
+        }),
+    )
     list_display = ["email", "username", "wallet", "is_superuser"]
     search_fields = ["email"]
     actions = ['generate_squad']
