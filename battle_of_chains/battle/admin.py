@@ -7,7 +7,7 @@ from .models import *
 
 @admin.register(Map)
 class MapAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
+    list_display = ('id', 'name', 'is_active')
 
 
 @admin.register(BattleType)
