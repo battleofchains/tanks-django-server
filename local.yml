@@ -101,26 +101,26 @@ services:
     depends_on:
       - elasticsearch
 
-#  celeryworker:
-#    <<: *django
-#    image: battle_of_chains_local_celeryworker
-#    container_name: celeryworker
-#    depends_on:
-#      - redis
-#      - postgres
-#    ports: []
-#    command: /start-celeryworker
-#
-#  celerybeat:
-#    <<: *django
-#    image: battle_of_chains_local_celerybeat
-#    container_name: celerybeat
-#    depends_on:
-#      - redis
-#      - postgres
-#    ports: []
-#    command: /start-celerybeat
-#
+  celeryworker:
+    <<: *django
+    image: battle_of_chains_local_celeryworker
+    container_name: celeryworker
+    depends_on:
+      - redis
+      - postgres
+    ports: []
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *django
+    image: battle_of_chains_local_celerybeat
+    container_name: celerybeat
+    depends_on:
+      - redis
+      - postgres
+    ports: []
+    command: /start-celerybeat
+
 #  flower:
 #    <<: *django
 #    image: battle_of_chains_local_flower
