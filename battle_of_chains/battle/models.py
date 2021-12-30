@@ -85,7 +85,7 @@ class Tank(models.Model):
     armor = models.PositiveIntegerField(default=50)
     block_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block, %',
                                                     validators=[MaxValueValidator(100)])
-    level = models.PositiveIntegerField(default=1)
+    level = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(15)])
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
     for_sale = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)

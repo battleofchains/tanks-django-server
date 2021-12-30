@@ -13,12 +13,12 @@ class NetworkAdmin(admin.ModelAdmin):
 
 @admin.register(Wallet)
 class WalletAdmin(AdminNoChangeMixin, admin.ModelAdmin):
-    list_display = ('address', 'date_add', 'last_modified')
+    list_display = ('address', 'user', 'date_add', 'last_modified')
 
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('name', 'symbol', 'address', 'network', 'deployed')
+    list_display = ('name', 'symbol', 'address', 'network', 'is_active')
     actions = ('deploy_contracts',)
 
     def deploy_contracts(self, request, queryset):
@@ -29,4 +29,4 @@ class ContractAdmin(admin.ModelAdmin):
 
 @admin.register(NFT)
 class NFTAdmin(AdminNoChangeMixin, admin.ModelAdmin):
-    list_display = ('address', 'tank')
+    list_display = ('tx_hash', 'tank')

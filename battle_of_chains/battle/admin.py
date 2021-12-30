@@ -1,8 +1,14 @@
-from django.contrib import admin
+import logging
+import traceback
 
+from django.contrib import admin, messages
+
+from battle_of_chains.blockchain.tasks import mint_nft_task
 from battle_of_chains.utils.mixins import AdminNoChangeMixin
 
 from .models import *
+
+logger = logging.getLogger(__name__)
 
 
 @admin.register(Map)
@@ -34,6 +40,16 @@ class ProjectileInline(admin.TabularInline):
 class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
     inlines = [ProjectileInline]
+    actions = ('mint_nft',)
+
+    def mint_nft(self, request, queryset):
+        for obj in queryset:
+            try:
+                mint_nft_task(obj.id)
+                self.message_user(request, f"NFT for tank {obj} is minting", level=messages.INFO)
+            except Exception as e:
+                self.message_user(request, f"Error occurred while trying to mint {obj}: {e} ", level=messages.ERROR)
+                logger.error(traceback.format_exc())
 
 
 @admin.register(ProjectileType)

@@ -44,7 +44,7 @@ class User(AbstractUser):
     """Default user for Battle of Chains."""
 
     email = models.EmailField(_('email address'), unique=True)
-    wallet = models.ForeignKey(Wallet, on_delete=models.SET_NULL, blank=True, null=True)
+    wallet = models.OneToOneField(Wallet, on_delete=models.SET_NULL, blank=True, null=True, related_name='user')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

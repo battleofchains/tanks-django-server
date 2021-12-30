@@ -25,21 +25,22 @@ class Network(models.Model):
 class Contract(models.Model):
     name = models.CharField(max_length=100)
     symbol = models.CharField(max_length=50, default='')
+    contract_definitions = models.JSONField()
     address = models.CharField(max_length=42, verbose_name='Contract address', blank=True, null=True)
     contract_url = models.URLField(verbose_name='Contract URL', blank=True, null=True)
-    network = models.OneToOneField(Network, on_delete=models.PROTECT)
-    deployed = models.BooleanField(default=False, verbose_name='Contract Deployed')
+    network = models.ForeignKey(Network, on_delete=models.PROTECT)
     date_add = models.DateTimeField(auto_now_add=True, verbose_name='Creation date')
     last_modified = models.DateTimeField(auto_now=True, verbose_name='Last update')
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
 
 class NFT(models.Model):
-    address = models.CharField(max_length=50, primary_key=True)
+    tx_hash = models.CharField(max_length=100, primary_key=True)
     tank = models.OneToOneField(Tank, on_delete=models.SET_NULL, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return 'NFT' + self.tank.name
+        return 'NFT ' + self.tank.name

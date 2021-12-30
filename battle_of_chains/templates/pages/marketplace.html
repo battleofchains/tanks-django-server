@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block javascript %}
+  <script src="{% static 'js/web3.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+  <script>
+    async function getAccount() {
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      return accounts[0];
+    }
+
+    let xhr = new XMLHttpRequest();
+    let abi;
+    xhr.open('GET', '/api/contracts/1/', false);
+    xhr.send();
+    if (xhr.status !== 200) {
+      alert( xhr.status + ': ' + xhr.statusText );
+    } else {
+      abi = JSON.parse(xhr.responseText).contract_definitions.abi;
+    }
+    const web3 = new Web3(Web3.givenProvider);
+    let myContract = new web3.eth.Contract(abi, '0x3c9323cde18914c9881799fa78c8fb696cc27440');
+
+    getAccount().then(function (account) {
+      console.log(account);
+      let txn = myContract.methods.buy(1);
+      let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.6')});
+      gas.then(function (gasAmount) {
+        console.log(gasAmount);
+        web3.eth.getTransactionCount(account).then(function (nonce) {
+          console.log(nonce);
+          web3.eth.getGasPrice().then(function (price) {
+            console.log(price);
+            txn.send({
+              gas: gasAmount,
+              from: account,
+              gasPrice: price,
+              nonce: nonce,
+              value: web3.utils.toWei('0.6')
+            }).then(function(receipt){
+                console.log(receipt);
+            });
+          })
+
+        })
+
+      })
+    });
+  </script>
+  {% for tank in object_list %}
+    <div>
+      <p>{{ tank.name }}</p>
+      <p><img src="{{ tank.image.url }}"></p>
+    </div>
+  {% endfor %}
+{% endblock %}

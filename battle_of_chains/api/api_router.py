@@ -7,6 +7,9 @@ from battle_of_chains.api.views import (
     ProjectileViewSet,
     TankViewSet,
     UserViewSet,
+    ContractViewSet,
+    TankNftMetaViewSet,
+    WalletViewSet,
 )
 
 if settings.DEBUG:
@@ -17,6 +20,9 @@ else:
 router.register("users", UserViewSet)
 router.register("tanks", TankViewSet)
 router.register("projectiles", ProjectileViewSet)
+router.register("contracts", ContractViewSet)
+router.register("nft-meta", TankNftMetaViewSet, basename='nft_meta')
+router.register("wallets", WalletViewSet)
 
 
 app_name = "api"
