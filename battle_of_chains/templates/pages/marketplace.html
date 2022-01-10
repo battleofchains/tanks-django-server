@@ -12,20 +12,29 @@
 
     let xhr = new XMLHttpRequest();
     let abi;
-    xhr.open('GET', '/api/contracts/1/', false);
+    let contract_address;
+    xhr.open('GET', '/api/contracts/2/', false);
     xhr.send();
     if (xhr.status !== 200) {
       alert( xhr.status + ': ' + xhr.statusText );
     } else {
-      abi = JSON.parse(xhr.responseText).contract_definitions.abi;
+      let data = JSON.parse(xhr.responseText);
+      abi = data.contract_definitions.abi;
+      contract_address = data.address;
     }
     const web3 = new Web3(Web3.givenProvider);
-    let myContract = new web3.eth.Contract(abi, '0x3c9323cde18914c9881799fa78c8fb696cc27440');
+    let myContract = new web3.eth.Contract(abi, contract_address);
 
     getAccount().then(function (account) {
       console.log(account);
+      let xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/wallets/', false);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('Authorization', 'Token 81bb6f858f62bbff4dacb4036dbba9991ccfe42c')
+      xhr.send("address=" + account);
+      console.log(xhr.status, xhr.statusText);
       let txn = myContract.methods.buy(1);
-      let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.6')});
+      let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.7')});
       gas.then(function (gasAmount) {
         console.log(gasAmount);
         web3.eth.getTransactionCount(account).then(function (nonce) {
@@ -37,7 +46,7 @@
               from: account,
               gasPrice: price,
               nonce: nonce,
-              value: web3.utils.toWei('0.6')
+              value: web3.utils.toWei('0.7')
             }).then(function(receipt){
                 console.log(receipt);
             });
