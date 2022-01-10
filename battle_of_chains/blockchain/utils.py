@@ -1,5 +1,6 @@
 import json
 import logging
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.urls import reverse
@@ -76,11 +77,10 @@ def mint_nft(tank: Tank, mainnet=False):
     address_to = tank.owner.wallet.address
     price = w3.toWei(tank.price, 'ether')
     meta_url = reverse('api:nft_meta-detail', args=[tank.id])
+    meta_url = urljoin(settings.SITE_URL, meta_url)
     txn = smart_contract.functions.mint(meta_url, address_to, price)
     tx_receipt = send_transaction(w3, txn, owner['address'], owner['secret'])
     logger.info(tx_receipt)
     if tx_receipt.get('transactionHash'):
         tx_hash = tx_receipt['transactionHash'].hex()
-        NFT.objects.create(
-            tank=tank, tx_hash=tx_hash, contract=contract
-        )
+        NFT.objects.create(tank=tank, tx_hash=tx_hash, contract=contract)

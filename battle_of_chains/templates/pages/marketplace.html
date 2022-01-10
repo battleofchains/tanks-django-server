@@ -13,14 +13,18 @@
     let xhr = new XMLHttpRequest();
     let abi;
     let contract_address;
-    xhr.open('GET', '/api/contracts/2/', false);
+    xhr.open('GET', '/api/contracts/', false);
     xhr.send();
     if (xhr.status !== 200) {
       alert( xhr.status + ': ' + xhr.statusText );
     } else {
       let data = JSON.parse(xhr.responseText);
-      abi = data.contract_definitions.abi;
-      contract_address = data.address;
+      data.forEach((element) => {
+        if (element.symbol === 'BOFCNFT') {
+          abi = element.contract_definitions.abi;
+          contract_address = element.address;
+        }
+      })
     }
     const web3 = new Web3(Web3.givenProvider);
     let myContract = new web3.eth.Contract(abi, contract_address);
@@ -47,7 +51,6 @@
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader('X-CSRFToken', csrftoken);
       xhr.send("address=" + account);
-      console.log(xhr.status, xhr.statusText);
       let txn = myContract.methods.buy(1);
       let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.7')});
       gas.then(function (gasAmount) {
