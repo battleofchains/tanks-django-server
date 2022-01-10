@@ -59,12 +59,33 @@ class WalletViewSet(RetrieveModelMixin, ListModelMixin, CreateModelMixin, Update
     serializer_class = WalletSerializer
     queryset = Wallet.objects.all()
 
+    def get_object(self):
+        return Wallet.objects.get(address__iexact=self.kwargs.get('pk'))
+
     def get_queryset(self, *args, **kwargs):
         if self.request.user.is_superuser:
             return self.queryset
         return self.queryset.filter(user=self.request.user)
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        self.request.user.wallet = instance
-        self.request.user.save()
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        created = False
+        try:
+            wallet = Wallet.objects.get(
+                address__iexact=serializer.validated_data.get('address')
+            )
+            wallet.save()
+            if request.user.wallet != wallet:
+                request.user.wallet = wallet
+                request.user.save()
+        except Wallet.DoesNotExist:
+            wallet = serializer.save()
+            created = True
+            request.user.wallet = wallet
+            request.user.save()
+        headers = self.get_success_headers(serializer.data)
+        if created:
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)

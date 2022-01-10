@@ -11,6 +11,10 @@ class Wallet(models.Model):
     def __str__(self):
         return self.address
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.address = self.address.lower()
+        super(Wallet, self).save(force_insert, force_update, using, update_fields)
+
 
 class Network(models.Model):
     name = models.CharField(max_length=100, verbose_name='Name')
