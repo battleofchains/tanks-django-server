@@ -45,6 +45,16 @@ class NFT(models.Model):
     tx_hash = models.CharField(max_length=100, primary_key=True)
     tank = models.OneToOneField(Tank, on_delete=models.SET_NULL, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True)
+    owner = models.ForeignKey(Wallet, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return 'NFT ' + self.tank.name
+
+
+class BlockchainEvent(models.Model):
+    tx_hash = models.CharField(max_length=100, verbose_name='Transaction Hash', primary_key=True)
+    event = models.CharField(max_length=100, verbose_name='Event name', editable=False)
+    args = models.JSONField(editable=False)
+    block_number = models.PositiveIntegerField(default=1, editable=False)
+    timestamp = models.PositiveIntegerField(editable=False, null=True)
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, editable=False)

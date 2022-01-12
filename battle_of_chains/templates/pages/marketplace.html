@@ -23,11 +23,11 @@
         if (element.symbol === 'BOFCNFT') {
           abi = element.contract_definitions.abi;
           contract_address = element.address;
+          console.log(contract_address);
         }
       })
     }
     const web3 = new Web3(Web3.givenProvider);
-    let myContract = new web3.eth.Contract(abi, contract_address);
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -51,28 +51,27 @@
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader('X-CSRFToken', csrftoken);
       xhr.send("address=" + account);
-      let txn = myContract.methods.buy(1);
-      let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.7')});
-      gas.then(function (gasAmount) {
-        console.log(gasAmount);
-        web3.eth.getTransactionCount(account).then(function (nonce) {
-          console.log(nonce);
-          web3.eth.getGasPrice().then(function (price) {
-            console.log(price);
-            txn.send({
-              gas: gasAmount,
-              from: account,
-              gasPrice: price,
-              nonce: nonce,
-              value: web3.utils.toWei('0.7')
-            }).then(function(receipt){
-                console.log(receipt);
-            });
-          })
-
-        })
-
-      })
+      {#let myContract = new web3.eth.Contract(abi, contract_address);#}
+      {#let txn = myContract.methods.buy(1);#}
+      {#let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.7')});#}
+      {#gas.then(function (gasAmount) {#}
+      {#  console.log(gasAmount);#}
+      {#  web3.eth.getTransactionCount(account).then(function (nonce) {#}
+      {#    console.log(nonce);#}
+      {#    web3.eth.getGasPrice().then(function (price) {#}
+      {#      console.log(price);#}
+      {#      txn.send({#}
+      {#        gas: gasAmount,#}
+      {#        from: account,#}
+      {#        gasPrice: price,#}
+      {#        nonce: nonce,#}
+      {#        value: web3.utils.toWei('0.7')#}
+      {#      }).then(function(receipt){#}
+      {#          console.log(receipt);#}
+      {#      });#}
+      {#    })#}
+      {#  })#}
+      {# })#}
     });
   </script>
   {% for tank in object_list %}

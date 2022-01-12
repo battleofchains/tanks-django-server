@@ -74,7 +74,7 @@ class TankType(models.Model):
 class Tank(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
-    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='tanks')
+    owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name='tanks', null=True, blank=True)
     hp = models.PositiveIntegerField(default=100)
     moving_price = models.PositiveIntegerField(default=1)
     damage_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus, %',
@@ -89,6 +89,7 @@ class Tank(models.Model):
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
     for_sale = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
+    sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
 
     def __str__(self):
         return f"{self.owner.username} | {self.name}" if self.name \

@@ -5,7 +5,7 @@ from django.core.cache import cache
 
 from battle_of_chains.battle.models import Tank
 from battle_of_chains.blockchain.models import Contract
-from battle_of_chains.blockchain.utils import deploy_smart_contract, mint_nft
+from battle_of_chains.blockchain.utils import deploy_smart_contract, mint_nft, read_contract_events
 from config.celery_app import app
 
 logger = logging.getLogger(__name__)
@@ -41,3 +41,9 @@ def mint_nft_task(self, tank_id):
         logger.error(f'Cannot mint tank {tank_id}. Error: {e}')
     finally:
         cache.delete(self.name)
+
+
+@app.task()
+def read_events():
+    for contract in Contract.objects.filter(is_active=True):
+        read_contract_events(contract)
