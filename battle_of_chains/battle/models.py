@@ -91,6 +91,7 @@ class Tank(models.Model):
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     basic_free_tank = models.BooleanField(default=False)
+    country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.owner or None} | {self.name}" if self.name \
@@ -138,3 +139,14 @@ class Projectile(models.Model):
 
     def __str__(self):
         return f'{self.type.name} {self.pk}'
+
+
+class Country(models.Model):
+    name = models.CharField(max_length=100)
+    image = models.ImageField(blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = 'Countries'
+
+    def __str__(self):
+        return self.name

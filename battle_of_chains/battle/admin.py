@@ -44,6 +44,7 @@ class TankAdmin(admin.ModelAdmin):
     inlines = [ProjectileInline]
     actions = ('mint_nft',)
     list_filter = ('type', 'basic_free_tank', 'for_sale')
+    search_fields = ('owner__email', 'id')
 
     def mint_nft(self, request, queryset):
         for obj in queryset:
@@ -63,3 +64,8 @@ class ProjectileTypeAdmin(admin.ModelAdmin):
 @admin.register(Projectile)
 class Projectile(admin.ModelAdmin):
     list_display = ('id', 'type', 'tank')
+
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
