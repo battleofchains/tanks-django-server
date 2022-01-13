@@ -6,6 +6,7 @@ from django.contrib import admin, messages
 from battle_of_chains.blockchain.tasks import mint_nft_task
 from battle_of_chains.utils.mixins import AdminNoChangeMixin
 
+from .forms import AtLeastOneFormSet
 from .models import *
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class TankTypeAdmin(admin.ModelAdmin):
 
 class ProjectileInline(admin.TabularInline):
     model = Projectile
-    extra = 0
+    extra = 1
+    formset = AtLeastOneFormSet
 
 
 @admin.register(Tank)
@@ -41,6 +43,7 @@ class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
     inlines = [ProjectileInline]
     actions = ('mint_nft',)
+    list_filter = ('type', 'basic_free_tank', 'for_sale')
 
     def mint_nft(self, request, queryset):
         for obj in queryset:

@@ -90,10 +90,11 @@ class Tank(models.Model):
     for_sale = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
+    basic_free_tank = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.owner.username} | {self.name}" if self.name \
-            else f'{self.owner.username} | {self.type.name} {self.pk}'
+        return f"{self.owner or None} | {self.name}" if self.name \
+            else f'{self.owner or None} | {self.type.name} {self.pk}'
 
     @property
     def max_hp(self):
