@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from django.contrib import admin, messages
+from django.contrib.admin.filters import SimpleListFilter
 
 from battle_of_chains.blockchain.tasks import mint_nft_task
 from battle_of_chains.utils.mixins import AdminNoChangeMixin
@@ -10,6 +11,38 @@ from .forms import AtLeastOneFormSet
 from .models import *
 
 logger = logging.getLogger(__name__)
+
+
+class HasOwnerFilter(SimpleListFilter):
+    default_value = 1
+    title = 'has owner'
+    parameter_name = 'owner__isnull'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('all', 'All'),
+            (0, 'Yes'),
+            (1, 'No')
+        )
+
+    def queryset(self, request, queryset):
+        val = self.value()
+        if val:
+            if not val.isdigit():
+                return queryset
+            else:
+                return queryset.filter(**{self.parameter_name: int(val)})
+        else:
+            return queryset.filter(**{self.parameter_name: self.default_value})
+
+    def choices(self, changelist):
+        for lookup, title in self.lookup_choices:
+            val = self.value() or str(self.default_value)
+            yield {
+                'selected': val == str(lookup),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
+                'display': title,
+            }
 
 
 @admin.register(Map)
@@ -43,7 +76,7 @@ class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
     inlines = [ProjectileInline]
     actions = ('mint_nft',)
-    list_filter = ('type', 'basic_free_tank', 'for_sale')
+    list_filter = (HasOwnerFilter, 'type', 'basic_free_tank', 'for_sale')
     search_fields = ('owner__email', 'id')
 
     def mint_nft(self, request, queryset):
