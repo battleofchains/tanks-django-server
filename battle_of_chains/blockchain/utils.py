@@ -68,7 +68,7 @@ def mint_nft(tank: Tank, mainnet=False):
     if NFT.objects.filter(tank=tank).exists():
         logger.error(f'NFT for tank {tank.id} already minted')
         return
-    if not tank.owner.wallet:
+    if not tank.owner or not tank.owner.wallet:
         logger.error(f'Tank {tank.id} owner has no associated wallet to mint to')
         return
     if mainnet:
