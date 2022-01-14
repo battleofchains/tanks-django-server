@@ -42,3 +42,39 @@ class ProjectileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Projectile
         fields = '__all__'
+
+
+class TankNftMetaSerializer(serializers.ModelSerializer):
+    symbol = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    external_url = serializers.SerializerMethodField()
+    attributes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Tank
+        fields = (
+            'name',
+            'symbol',
+            'description',
+            'image',
+            'external_url',
+            'attributes',
+        )
+
+    def get_symbol(self, obj):
+        return 'BOFCNFT'
+
+    def get_description(self, obj):
+        return 'Battle of Chains tank NFT'
+
+    def get_external_url(self, obj):
+        return 'https://battleofchains.com'
+
+    def get_attributes(self, obj):
+        attributes = []
+        for attr in (
+            'level', 'hp', 'armor', 'moving_price', 'damage_bonus', 'critical_chance', 'overlook', 'block_chance'
+        ):
+            value = getattr(obj, attr)
+            attributes.append({'trait_type': attr, 'value': value})
+        return attributes

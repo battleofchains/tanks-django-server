@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block javascript %}
+  <script src="{% static 'js/web3.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+  <script>
+    async function getAccount() {
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      return accounts[0];
+    }
+
+    let xhr = new XMLHttpRequest();
+    let abi;
+    let contract_address;
+    xhr.open('GET', '/api/contracts/', false);
+    xhr.send();
+    if (xhr.status !== 200) {
+      alert( xhr.status + ': ' + xhr.statusText );
+    } else {
+      let data = JSON.parse(xhr.responseText);
+      data.forEach((element) => {
+        if (element.symbol === 'BOFCNFT') {
+          abi = element.contract_definitions.abi;
+          contract_address = element.address;
+          console.log(contract_address);
+        }
+      })
+    }
+    const web3 = new Web3(Web3.givenProvider);
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    getAccount().then(function (account) {
+      console.log(account);
+      let xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/wallets/', false);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('X-CSRFToken', csrftoken);
+      xhr.send("address=" + account);
+      {#let myContract = new web3.eth.Contract(abi, contract_address);#}
+      {#let txn = myContract.methods.buy(1);#}
+      {#let gas = txn.estimateGas({from: account, value: web3.utils.toWei('0.7')});#}
+      {#gas.then(function (gasAmount) {#}
+      {#  console.log(gasAmount);#}
+      {#  web3.eth.getTransactionCount(account).then(function (nonce) {#}
+      {#    console.log(nonce);#}
+      {#    web3.eth.getGasPrice().then(function (price) {#}
+      {#      console.log(price);#}
+      {#      txn.send({#}
+      {#        gas: gasAmount,#}
+      {#        from: account,#}
+      {#        gasPrice: price,#}
+      {#        nonce: nonce,#}
+      {#        value: web3.utils.toWei('0.7')#}
+      {#      }).then(function(receipt){#}
+      {#          console.log(receipt);#}
+      {#      });#}
+      {#    })#}
+      {#  })#}
+      {# })#}
+    });
+  </script>
+  {% for tank in object_list %}
+    <div>
+      <p>{{ tank.name }}</p>
+      <p><img src="{{ tank.image.url }}"></p>
+    </div>
+  {% endfor %}
+{% endblock %}

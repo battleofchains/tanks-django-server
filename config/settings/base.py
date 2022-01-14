@@ -16,6 +16,7 @@ if READ_DOT_ENV_FILE:
     env.read_env(str(ROOT_DIR / ".env"))
 
 # GENERAL
+SITE_URL = 'https://test.battleofchains.com/'
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = env.bool("DJANGO_DEBUG", False)
@@ -325,5 +326,8 @@ REST_FRAMEWORK = {
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 # CORS_URLS_REGEX = r"^/api/.*$"
-# Your stuff...
-# ------------------------------------------------------------------------------
+
+CONTRACTS_OWNER = {
+    'address': env.str('CONTRACTS_OWNER_ADDRESS'),
+    'secret': env.str('CONTRACTS_OWNER_SECRET')
+}

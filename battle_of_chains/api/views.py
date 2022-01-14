@@ -7,14 +7,18 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from battle_of_chains.battle.models import Projectile, Tank
 from battle_of_chains.battle.serializers import (
     ProjectileSerializer,
+    TankNftMetaSerializer,
     TankSerializer,
 )
+from battle_of_chains.blockchain.models import Contract, Wallet
+from battle_of_chains.blockchain.serializers import ContractSerializer, WalletSerializer
 from battle_of_chains.users.serializers import UserSerializer
 
 User = get_user_model()
@@ -49,3 +53,50 @@ class ProjectileViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, Ge
 
     def get_queryset(self, *args, **kwargs):
         return self.queryset.filter(tank_id__in=self.request.user.tanks.values_list('id', flat=True))
+
+
+class ContractViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
+    serializer_class = ContractSerializer
+    queryset = Contract.objects.filter(is_active=True)
+
+
+class TankNftMetaViewSet(RetrieveModelMixin, GenericViewSet):
+    serializer_class = TankNftMetaSerializer
+    queryset = Tank.objects.all()
+    permission_classes = [AllowAny]
+
+
+class WalletViewSet(RetrieveModelMixin, ListModelMixin, CreateModelMixin, UpdateModelMixin, GenericViewSet):
+    serializer_class = WalletSerializer
+    queryset = Wallet.objects.all()
+
+    def get_object(self):
+        return Wallet.objects.get(address__iexact=self.kwargs.get('pk'))
+
+    def get_queryset(self, *args, **kwargs):
+        if self.request.user.is_superuser:
+            return self.queryset
+        return self.queryset.filter(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        created = False
+        try:
+            wallet = Wallet.objects.get(
+                address__iexact=serializer.validated_data.get('address')
+            )
+            wallet.save()
+            if request.user.wallet != wallet:
+                request.user.wallet = wallet
+                request.user.save()
+        except Wallet.DoesNotExist:
+            wallet = serializer.save()
+            created = True
+            request.user.wallet = wallet
+            request.user.save()
+        headers = self.get_success_headers(serializer.data)
+        if created:
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)

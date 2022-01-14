@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
 
+TIME_TO_MOVE = 15
+
 
 def log_and_emit_error(function):
     @wraps(function)
@@ -198,7 +200,7 @@ class MainNamespace(socketio.AsyncNamespace):
 
     async def wait_next_move(self, game, current_player):
         player = current_player['username']
-        for i in range(30, 0, -1):
+        for i in range(TIME_TO_MOVE, 0, -1):
             await asyncio.sleep(1)
             if game.state == 'running':
                 if game.current_player['username'] == player:
