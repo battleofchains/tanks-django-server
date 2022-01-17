@@ -91,6 +91,7 @@ class Tank(models.Model):
     for_sale = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
+    hull_sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     basic_free_tank = models.BooleanField(default=False)
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True, blank=True)
 
