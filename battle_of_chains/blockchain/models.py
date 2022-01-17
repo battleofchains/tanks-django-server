@@ -48,7 +48,13 @@ class NFT(models.Model):
     owner = models.ForeignKey(Wallet, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return 'NFT ' + self.tank.name
+        return 'NFT for ' + self.tank.name
+
+    @property
+    def link(self):
+        if self.contract:
+            return f"{self.contract.network.url_explorer}/token/{self.contract.address}?a={self.tank_id}"
+        return ''
 
 
 class BlockchainEvent(models.Model):

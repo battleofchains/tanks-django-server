@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
 
-TIME_TO_MOVE = 15
+TIME_TO_MOVE = 30
 
 
 def log_and_emit_error(function):

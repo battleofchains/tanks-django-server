@@ -94,6 +94,7 @@ class Tank(models.Model):
     hull_sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     basic_free_tank = models.BooleanField(default=False)
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True, blank=True)
+    offer = models.ForeignKey('market.Offer', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.owner or None} | {self.name}" if self.name \

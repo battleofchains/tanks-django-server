@@ -29,7 +29,7 @@ class ContractAdmin(admin.ModelAdmin):
 
 @admin.register(NFT)
 class NFTAdmin(AdminNoChangeMixin, admin.ModelAdmin):
-    list_display = ('tx_hash', 'tank')
+    list_display = ('tx_hash', 'tank', 'link')
 
 
 @admin.register(BlockchainEvent)

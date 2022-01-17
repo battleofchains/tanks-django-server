@@ -89,6 +89,7 @@ LOCAL_APPS = [
     "battle_of_chains.battle.apps.BattleConfig",
     "battle_of_chains.blockchain.apps.BlockchainConfig",
     "battle_of_chains.front.apps.FrontConfig",
+    "battle_of_chains.market.apps.MarketConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
