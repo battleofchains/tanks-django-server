@@ -65,6 +65,7 @@ DJANGO_APPS = [
     "django.contrib.admin",
     "django.forms",
     'channels',
+    'sockpuppet',
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -331,4 +332,27 @@ REST_FRAMEWORK = {
 CONTRACTS_OWNER = {
     'address': env.str('CONTRACTS_OWNER_ADDRESS'),
     'secret': env.str('CONTRACTS_OWNER_SECRET')
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env("REDIS_URL"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "IGNORE_EXCEPTIONS": True,
+        },
+    }
 }
