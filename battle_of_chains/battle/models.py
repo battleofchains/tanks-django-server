@@ -1,6 +1,7 @@
 from colorful.fields import RGBColorField
 from django.core.validators import MaxValueValidator
 from django.db import models
+from PIL import Image
 from solo.models import SingletonModel
 
 
@@ -93,6 +94,7 @@ class Tank(models.Model):
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     hull_sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
+    menu_image = models.ImageField(upload_to=upload_tank_path, blank=True, null=True)
     basic_free_tank = models.BooleanField(default=False)
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True, blank=True)
     origin_offer = models.ForeignKey('market.Offer', on_delete=models.SET_NULL, null=True, blank=True)
@@ -104,6 +106,17 @@ class Tank(models.Model):
     @property
     def max_hp(self):
         return self.level * self.type.hp_step
+
+    def save(self, *args, **kwargs):
+        old = Tank.objects.filter(pk=getattr(self, 'pk', None)).first()
+        super().save(*args, **kwargs)
+        if old:
+            for image_field in ('image', 'menu_image', 'sprite', 'hull_sprite'):
+                image = getattr(self, image_field, None)
+                if image:
+                    if getattr(old, image_field, None) != image:
+                        img = Image.open(image.path)
+                        img.save(image.path, optimize=True)
 
 
 class ProjectileType(models.Model):
@@ -158,7 +171,6 @@ class Country(models.Model):
 
 class BattleSettings(SingletonModel):
     time_to_move = models.PositiveSmallIntegerField(verbose_name='Time to make move, seconds', default=45)
-    menu_image = models.ImageField(blank=True, null=True)
 
     def __str__(self):
         return 'Global battle settings'
