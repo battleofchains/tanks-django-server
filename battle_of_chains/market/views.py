@@ -1,8 +1,7 @@
+from django.db.models import Max, Q
 from django.views.generic import TemplateView
 
-from battle_of_chains.battle.models import Tank
-
-from .models import Offer
+from battle_of_chains.battle.models import Tank, TankType
 
 
 class MarketPlaceView(TemplateView):
@@ -10,8 +9,12 @@ class MarketPlaceView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(MarketPlaceView, self).get_context_data(**kwargs)
-        offers = Offer.objects.filter(is_active=True)
-        tanks = Tank.objects.filter(for_sale=True, basic_free_tank=False)
-        context['offers'] = offers
+        tanks = Tank.objects.filter(
+            Q(for_sale=True, basic_free_tank=False) | Q(basic_free_tank=True, offer__is_active=True)
+        )
+        context['type_filter'] = TankType.objects.values_list('id', 'name')
         context['tanks'] = tanks
+        maxes = [Max(prop) for prop in ('level', 'moving_price', 'overlook', 'armor', 'hp')]
+        range_filters = Tank.objects.aggregate(*maxes)
+        context['range_filters'] = {k.split('__')[0]: v for k, v in range_filters.items()}
         return context

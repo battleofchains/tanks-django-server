@@ -11,3 +11,52 @@
   background-color: #f2dede;
   border-color: #eed3d7;
 }
+
+.black-theme {
+  background: black;
+  color: white;
+}
+.range {
+  width: 100%;
+}
+.range-vals {
+  display: flex;
+  justify-content: space-between;
+}
+.range-wrap {
+  position: relative;
+  margin: 0 auto 3rem;
+}
+.bubble {
+  background: white;
+  color: black;
+  padding: 4px 12px;
+  position: absolute;
+  border-radius: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 20px;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  top: -1px;
+  left: 50%;
+}
+.nav-marketplace {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+.checkbox-wrap {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+.card-wrap {
+  border: white 1px solid;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}

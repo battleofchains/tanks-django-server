@@ -4,14 +4,41 @@
   <script src="{% static 'sockpuppet/sockpuppet.js' %}"></script>
   <script src="{% static 'js/web3.min.js' %}"></script>
 {% endblock %}
+{% block body-class %}black-theme{% endblock %}
+{% block navbar %}
+  <nav class="navbar nav-marketplace">
+    <div class="container">
+      <img src="{% static 'images/Logo.png' %}" alt="logo">
+    </div>
+  </nav>
+{% endblock %}
 {% block content %}
-  <script>
-
-  </script>
-  <div class="row">
+  <div class="row" data-reflex-root=".offers">
     <div class="col-3 filters">
       <p>Filter</p>
       <hr>
+      <p>Тип танка</p>
+      <div class="checkbox-wrap">
+        {% for id, name in type_filter %}
+          <label>{{ name }}
+            <input type="checkbox" name="{{ name }}" value="{{ id }}"
+                   data-reflex="change->MarketReflex#filter"
+                   data-filter="type__in">
+          </label>
+        {% endfor %}
+      </div>
+      <hr>
+    {% for filter_name, max_value in range_filters.items %}
+      <p>{{ filter_name }}</p>
+      <div class="range-wrap">
+        <input type="range" min="0" max="{{ max_value }}" step="1" value="0" class="range"
+             data-reflex="change->MarketReflex#filter"
+             data-filter="{{ filter_name }}">
+        <output class="bubble"></output>
+        <div class="range-vals"><span>0</span><span>{{ max_value }}</span></div>
+      </div>
+      <hr>
+    {% endfor %}
     </div>
     <div class="col-9 offers">
       <p>NFTs For Sale</p>
@@ -19,11 +46,36 @@
       {% for tank in tanks %}
         {% if forloop.counter0|divisibleby:"4" %}<div class="row">{% endif %}
         <div class="col-3">
-          <p><img src="{{ tank.image.url }}" style="width:100%"></p>
-          <p>{{ tank.name }}</p>
+          <div class="card-wrap">
+            <p><img src="{{ tank.image.url }}" style="width:100%"></p>
+            <p>{{ tank.name }}</p>
+          </div>
         </div>
         {% if forloop.counter|divisibleby:"4" or forloop.last %}</div>{% endif %}
       {% endfor %}
     </div>
   </div>
 {% endblock %}
+
+{% block inline_javascript %}
+  <script>
+    const allRanges = document.querySelectorAll(".range-wrap");
+    allRanges.forEach(wrap => {
+      const range = wrap.querySelector(".range");
+      const bubble = wrap.querySelector(".bubble");
+      range.addEventListener("input", () => {
+        setBubble(range, bubble);
+      });
+      setBubble(range, bubble);
+    });
+
+    function setBubble(range, bubble) {
+      const val = range.value;
+      const min = range.min ? range.min : 0;
+      const max = range.max ? range.max : 100;
+      const newVal = Number(((val - min) * 100) / (max - min));
+      bubble.innerHTML = val;
+      bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+    }
+  </script>
+{% endblock inline_javascript %}
