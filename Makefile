@@ -2,9 +2,9 @@ USERID := $$(id -u)
 GROUPID := $$(id -g)
 COMPOSE := CURRENT_UID=$(USERID):$(GROUPID) docker-compose -f local.yml
 COMPOSE_PROD := CURRENT_UID=$(USERID):$(GROUPID) docker-compose -f production.yml
-MANAGE := docker-compose -f local.yml run -u $(USERID):$(GROUPID) --rm django python manage.py
-MANAGE_PROD := docker-compose -f production.yml run -u $(USERID):$(GROUPID) --rm django python manage.py
-DJANGO := docker-compose -f local.yml run -u $(USERID):$(GROUPID) --rm django
+MANAGE := docker-compose -f local.yml run --rm django python manage.py
+MANAGE_PROD := docker-compose -f production.yml run --rm django python manage.py
+DJANGO := docker-compose -f local.yml run --rm django
 
 build:
 	$(COMPOSE) build
@@ -41,3 +41,9 @@ load_fixtures:
 
 test:
 	$(DJANGO) pytest
+
+bash:
+	$(DJANGO) bash
+
+django-logs:
+	$(COMPOSE) logs django

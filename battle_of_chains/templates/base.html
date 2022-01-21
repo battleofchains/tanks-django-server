@@ -32,9 +32,10 @@
 
   </head>
 
-  <body>
+  <body class="{% block body-class %}{% endblock %}">
 
     <div class="mb-1">
+    {% block navbar %}
       <nav class="navbar navbar-expand-md navbar-light bg-light">
         <div class="container-fluid">
           <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +67,7 @@
           </div>
         </div>
       </nav>
-
+    {% endblock %}
     </div>
 
     <div class="container">
@@ -89,13 +90,6 @@
     {% block modal %}{% endblock modal %}
 
     {% block inline_javascript %}
-    {% comment %}
-    Script tags with only code, no src (defer by default). To run
-    with a "defer" so that you run run inline code:
-    <script>
-      window.addEventListener('DOMContentLoaded', () => {/* Run whatever you want */});
-    </script>
-    {% endcomment %}
     {% endblock inline_javascript %}
   </body>
 </html>

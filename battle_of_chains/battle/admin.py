@@ -76,7 +76,8 @@ class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'owner')
     inlines = [ProjectileInline]
     actions = ('mint_nft',)
-    list_filter = (HasOwnerFilter, 'type', 'basic_free_tank', 'for_sale', 'offer')
+    list_filter = (HasOwnerFilter, 'type', 'basic_free_tank', 'for_sale', 'origin_offer')
+    readonly_fields = ('origin_offer',)
     search_fields = ('owner__email', 'id')
 
     def mint_nft(self, request, queryset):
