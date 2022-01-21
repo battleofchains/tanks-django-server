@@ -3,6 +3,7 @@ import traceback
 
 from django.contrib import admin, messages
 from django.contrib.admin.filters import SimpleListFilter
+from solo.admin import SingletonModelAdmin
 
 from battle_of_chains.blockchain.tasks import mint_nft_task
 from battle_of_chains.utils.mixins import AdminNoChangeMixin
@@ -103,3 +104,8 @@ class Projectile(admin.ModelAdmin):
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
     list_display = ('name',)
+
+
+@admin.register(BattleSettings)
+class BattleSettingsAdmin(SingletonModelAdmin):
+    pass

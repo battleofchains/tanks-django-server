@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db.models import Count
 
-from battle_of_chains.battle.models import Battle, BattleType, Map, Tank
+from battle_of_chains.battle.models import Battle, BattleSettings, BattleType, Map, Tank
 from battle_of_chains.battle.serializers import (
     BattleTypeSerializer,
     MapSerializer,
@@ -95,3 +95,8 @@ def cache_set_async(key, val, timeout):
 @sync_to_async
 def cache_get_async(key):
     return cache.get(key)
+
+
+@database_sync_to_async
+def get_battle_settings():
+    return BattleSettings.get_solo()

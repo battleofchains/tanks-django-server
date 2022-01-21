@@ -1,6 +1,7 @@
 from colorful.fields import RGBColorField
 from django.core.validators import MaxValueValidator
 from django.db import models
+from solo.models import SingletonModel
 
 
 def upload_maps_path(instance, filename):
@@ -153,3 +154,11 @@ class Country(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BattleSettings(SingletonModel):
+    time_to_move = models.PositiveSmallIntegerField(verbose_name='Time to make move, seconds', default=45)
+    menu_image = models.ImageField(blank=True, null=True)
+
+    def __str__(self):
+        return 'Global battle settings'

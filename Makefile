@@ -46,4 +46,4 @@ bash:
 	$(DJANGO) bash
 
 django-logs:
-	$(COMPOSE) logs django
+	$(COMPOSE) logs --tail 100 django

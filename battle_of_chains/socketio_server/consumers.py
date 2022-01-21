@@ -22,8 +22,6 @@ logger = logging.getLogger(__name__)
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=[])
 app = socketio.ASGIApp(sio)
 
-TIME_TO_MOVE = 45
-
 
 def log_and_emit_error(function):
     @wraps(function)
@@ -147,7 +145,7 @@ class MainNamespace(socketio.AsyncNamespace):
             await self.emit('turn', message, room=game.room.name)
             log_json_info(event_source='server', event='turn', sid=sid, user_id=user.id,
                           msg=message, room=game.room.name, battle=game.battle.id)
-            self.set_next_player(game)
+            game.set_next_player()
 
     @log_and_emit_error
     async def on_lose(self, sid, message):
@@ -180,8 +178,6 @@ class MainNamespace(socketio.AsyncNamespace):
             await self.emit('left', message, room=game.room.name)
             log_json_info(event_source='server', event='left', sid=sid, user_id=user.id,
                           msg=message, room=game.room.name, battle=game.battle.id)
-            if game.order:
-                game.order.pop(game.order.index(user.username))
             if game.state == Game.STATE.RUNNING and len(usernames) == 1:
                 await self.finish_game(game)
         await self.disconnect(sid)
@@ -200,7 +196,7 @@ class MainNamespace(socketio.AsyncNamespace):
 
     async def wait_next_move(self, game, current_player):
         player = current_player['username']
-        for i in range(TIME_TO_MOVE, 0, -1):
+        for i in range(game.time_to_move, 0, -1):
             await asyncio.sleep(1)
             if game.state == 'running':
                 if game.current_player['username'] == player:
@@ -214,7 +210,7 @@ class MainNamespace(socketio.AsyncNamespace):
             await self.emit('turn', {"username": player}, room=game.room.name)
             log_json_info(event_source='server', event='turn', msg={"username": player},
                           room=game.room.name, battle=game.battle.id)
-            self.set_next_player(game)
+            game.set_next_player()
             await self.wait_next_move(game, game.current_player)
 
     async def finish_game(self, game):
@@ -234,20 +230,6 @@ class MainNamespace(socketio.AsyncNamespace):
             del self.games[game.id]
         except KeyError:
             pass
-
-    @staticmethod
-    def set_next_player(game):
-        cur_index = game.order.index(game.current_player['username'])
-        current_player = game.order[cur_index - 1]
-        tanks_order = game.users[current_player]['tanks_order']
-        last_tank = game.users[current_player].get('last_tank')
-        if last_tank:
-            cur_tank_index = tanks_order.index(last_tank)
-            current_tank = tanks_order[cur_tank_index - 1]
-        else:
-            current_tank = tanks_order[-1]
-        game.users[current_player]['last_tank'] = current_tank
-        game.current_player = {'username': current_player, 'tank': current_tank}
 
 
 sio.register_namespace(MainNamespace('/'))
