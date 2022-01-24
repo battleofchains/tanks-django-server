@@ -13,46 +13,52 @@
   </nav>
 {% endblock %}
 {% block content %}
-  <div class="row" data-reflex-root=".offers">
-    <div class="col-3 filters">
-      <p>Filter</p>
-      <hr>
-      <p>Тип танка</p>
-      <div class="checkbox-wrap">
-        {% for id, name in type_filter %}
-          <label>{{ name }}
-            <input type="checkbox" name="{{ name }}" value="{{ id }}"
-                   data-reflex="change->MarketReflex#filter"
-                   data-filter="type__in">
-          </label>
-        {% endfor %}
+  <div class="row">
+    <div class="col-3 filters" data-reflex-root=".reflex-wrapper">
+      <div class="reflex-filters-wrapper">
+        <div class="reset-button" data-reflex="click->MarketReflex#clear_filters" data-reflex-root="body">Reset</div>
+        <div>Filter</div>
+        <hr>
+        <p>Тип танка</p>
+        <div class="checkbox-wrap">
+          {% for id, name in type_filter %}
+            <label>{{ name }}
+              <input type="checkbox" name="{{ name }}" value="{{ id }}"
+                     data-reflex="change->MarketReflex#filter"
+                     data-filter="type__in">
+            </label>
+          {% endfor %}
+        </div>
+        <hr>
+      {% for filter_name, max_value in range_filters.items %}
+        <p>{{ filter_name }}</p>
+        <div class="range-wrap">
+          <input type="range" min="0" max="{{ max_value }}" step="1" value="0" class="range"
+               data-reflex="change->MarketReflex#filter"
+               data-filter="{{ filter_name }}">
+          <output class="bubble"></output>
+          <div class="range-vals"><span>0</span><span>{{ max_value }}</span></div>
+        </div>
+        <hr>
+      {% endfor %}
       </div>
-      <hr>
-    {% for filter_name, max_value in range_filters.items %}
-      <p>{{ filter_name }}</p>
-      <div class="range-wrap">
-        <input type="range" min="0" max="{{ max_value }}" step="1" value="0" class="range"
-             data-reflex="change->MarketReflex#filter"
-             data-filter="{{ filter_name }}">
-        <output class="bubble"></output>
-        <div class="range-vals"><span>0</span><span>{{ max_value }}</span></div>
-      </div>
-      <hr>
-    {% endfor %}
     </div>
     <div class="col-9 offers">
-      <p>NFTs For Sale</p>
-      <hr>
-      {% for tank in tanks %}
-        {% if forloop.counter0|divisibleby:"4" %}<div class="row">{% endif %}
-        <div class="col-3">
-          <div class="card-wrap">
-            <p><img src="{{ tank.image.url }}" style="width:100%"></p>
-            <p>{{ tank.name }}</p>
+      <div class="reflex-wrapper">
+        <div>NFTs For Sale</div>
+        <div class="results-count">{{ tanks|length }} results</div>
+        <hr>
+        {% for tank in tanks %}
+          {% if forloop.counter0|divisibleby:"4" %}<div class="row">{% endif %}
+          <div class="col-3">
+            <div class="card-wrap">
+              <p><img src="{{ tank.image.url }}" style="width:100%"></p>
+              <p>{{ tank.name }}</p>
+            </div>
           </div>
-        </div>
-        {% if forloop.counter|divisibleby:"4" or forloop.last %}</div>{% endif %}
-      {% endfor %}
+          {% if forloop.counter|divisibleby:"4" or forloop.last %}</div>{% endif %}
+        {% endfor %}
+      </div>
     </div>
   </div>
 {% endblock %}

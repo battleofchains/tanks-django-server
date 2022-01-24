@@ -14,12 +14,19 @@ class MarketReflex(Reflex):
                 filters[filter_name].add(filter_value)
             else:
                 filters[filter_name].remove(filter_value)
+                if len(filters[filter_name]) == 0:
+                    del filters[filter_name]
         else:
             if int(filter_value) > 0:
                 filters[filter_name] = filter_value
             else:
                 del filters[filter_name]
         self.request.session['filters'] = filters
-
         queryset = context['tanks']
         context['tanks'] = queryset.filter(**filters)
+
+    def clear_filters(self):
+        context = self.get_context_data()
+        self.request.session['filters'] = defaultdict(set)
+        queryset = context['tanks']
+        context['tanks'] = queryset.all()
