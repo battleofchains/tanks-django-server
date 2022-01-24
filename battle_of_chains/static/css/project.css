@@ -60,3 +60,12 @@
   border-radius: 10px;
   margin-bottom: 20px;
 }
+.results-count {
+  color: #777E91;
+  font-size: 14px;
+}
+.reset-button {
+  color: #FE7524;
+  float: right;
+  cursor: pointer;
+}
