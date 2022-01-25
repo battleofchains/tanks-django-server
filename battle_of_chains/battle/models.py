@@ -98,6 +98,7 @@ class Tank(models.Model):
     basic_free_tank = models.BooleanField(default=False)
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True, blank=True)
     origin_offer = models.ForeignKey('market.Offer', on_delete=models.SET_NULL, null=True, blank=True)
+    date_mod = models.DateTimeField(auto_now=True, verbose_name='Modified')
 
     def __str__(self):
         return f"{self.owner or None} | {self.name}" if self.name \

@@ -52,15 +52,16 @@
 }
 .checkbox-wrap {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   flex-wrap: wrap;
 }
 .card-wrap {
   border: white 1px solid;
   border-radius: 10px;
   margin-bottom: 20px;
+  overflow: hidden;
 }
-.results-count {
+.small-text {
   color: #777E91;
   font-size: 14px;
 }
@@ -68,4 +69,71 @@
   color: #FE7524;
   float: right;
   cursor: pointer;
+  font-size: 14px;
+}
+.card-top {
+  width: 100%;
+  min-height: 263px;
+  background-size: cover;
+  background-position: center;
+}
+.card-bottom, .filters {
+  background-color: #24262C;
+}
+.card-bottom, .card-top {
+  padding: 15px;
+}
+.tank-id, .tank-type {
+  float: left;
+  padding: 8px 8px 6px;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.tank-supply {
+  float: right;
+}
+.tank-id {
+  background: #777E91;
+}
+.tank-type {
+  background: #FE7524;
+  margin-left: 7px;
+}
+.tank-supply {
+  color: black;
+  font-size: 12px;
+  padding: 8px 8px 6px;
+}
+.card-bottom-1 {
+  margin-bottom: 20px;
+}
+.tank-name {
+  font-size: 20px;
+}
+.tank-price {
+  color: #FE7524;
+  font-size: 16px;
+}
+.card-bottom-2 > img {
+  float: right;
+}
+.title-block {
+  display: flex;
+  justify-content: space-between;
+}
+.reflex-filters-wrapper {
+  padding: 20px 10px;
+}
+.login > a {
+  background: #FE7524;
+  width: 75px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #FCFCFD;
+  text-decoration: none;
 }

@@ -16,3 +16,11 @@ class Offer(models.Model):
     @property
     def amount_sold(self):
         return Tank.objects.filter(offer=self, nft__isnull=False).count()
+
+    @property
+    def amount_left(self):
+        return self.amount - Tank.objects.filter(offer=self, nft__isnull=False).count()
+
+    def save(self, *args, **kwargs):
+        super(Offer, self).save(*args, **kwargs)
+        self.base_tank.save()

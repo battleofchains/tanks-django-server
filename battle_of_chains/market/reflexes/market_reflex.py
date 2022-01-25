@@ -30,3 +30,18 @@ class MarketReflex(Reflex):
         self.request.session['filters'] = defaultdict(set)
         queryset = context['tanks']
         context['tanks'] = queryset.all()
+
+    def sort(self):
+        context = self.get_context_data()
+        queryset = context['tanks']
+        filters = self.request.session.get('filters', None)
+        if filters:
+            queryset = queryset.filter(**filters)
+        value = self.element.attributes['value']
+        match value:
+            case 'max_price':
+                context['tanks'] = queryset.order_by('-price')
+            case 'min_price':
+                context['tanks'] = queryset.order_by('price')
+            case _:
+                context['tanks'] = queryset.order_by('-date_mod')

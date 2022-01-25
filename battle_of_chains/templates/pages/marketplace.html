@@ -9,14 +9,24 @@
   <nav class="navbar nav-marketplace">
     <div class="container">
       <img src="{% static 'images/Logo.png' %}" alt="logo">
+      <div class="menu row">
+        <div class="col">Dashboard</div>
+        <div class="col">Marketplace</div>
+        <div class="col">Staking</div>
+        <div class="col">Help&nbspCenter</div>
+        <div class="col">Download</div>
+      </div>
+      <div class="login">
+        <a href="/accounts/login/">Log In</a>
+      </div>
     </div>
   </nav>
 {% endblock %}
 {% block content %}
-  <div class="row">
-    <div class="col-3 filters" data-reflex-root=".reflex-wrapper">
+  <div class="row justify-content-between" data-reflex-root=".reflex-wrapper">
+    <div class="col-2 filters">
       <div class="reflex-filters-wrapper">
-        <div class="reset-button" data-reflex="click->MarketReflex#clear_filters" data-reflex-root="body">Reset</div>
+        <div data-id="reset" class="reset-button" data-reflex="click->MarketReflex#clear_filters">Reset</div>
         <div>Filter</div>
         <hr>
         <p>Тип танка</p>
@@ -45,19 +55,47 @@
     </div>
     <div class="col-9 offers">
       <div class="reflex-wrapper">
-        <div>NFTs For Sale</div>
-        <div class="results-count">{{ tanks|length }} results</div>
+        <div class="title-block">
+          <div>
+            <div>NFTs For Sale</div>
+            <div class="small-text">{{ tanks|length }} results</div>
+          </div>
+          <div>
+            <span class="small-text">Sort by</span>
+            <select data-reflex="change->MarketReflex#sort">
+              <option value="newest" selected>Newest</option>
+              <option value="min_price"> Min Price</option>
+              <option value="max_price"> Max Price</option>
+            </select>
+          </div>
+        </div>
         <hr>
+      <div class="row row-cols-4">
         {% for tank in tanks %}
-          {% if forloop.counter0|divisibleby:"4" %}<div class="row">{% endif %}
-          <div class="col-3">
+          <div class="col">
             <div class="card-wrap">
-              <p><img src="{{ tank.image.url }}" style="width:100%"></p>
-              <p>{{ tank.name }}</p>
+              <div class="card-top" style="background-image: url('{{ tank.image.url }}');">
+                <div>
+                  <span class="tank-id"># {{ tank.id }}</span>
+                  <span class="tank-type">{{ tank.type }}</span>
+                  <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_left }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
+                </div>
+              </div>
+              <div class="card-bottom">
+                <div class="card-bottom-1">
+                  <div class="tank-name">{{ tank.name }}</div>
+                  <div class="small-text">{{ tank.type }}</div>
+                </div>
+                <div class="card-bottom-2">
+                  <img src="{% static 'images/cart-btn.png' %}" alt="cart">
+                  <div class="tank-price">{{ tank.price }} BNB</div>
+                </div>
+              </div>
             </div>
           </div>
-          {% if forloop.counter|divisibleby:"4" or forloop.last %}</div>{% endif %}
+
         {% endfor %}
+       </div>
       </div>
     </div>
   </div>
@@ -83,5 +121,21 @@
       bubble.innerHTML = val;
       bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
     }
+
+    document.addEventListener('stimulus-reflex:success', event => {
+      if (event.target.dataset['id'] === 'reset') {
+        const allRanges = document.querySelectorAll(".range-wrap");
+        allRanges.forEach(wrap => {
+          const range = wrap.querySelector(".range");
+          const bubble = wrap.querySelector(".bubble");
+          range.value = 0;
+          setBubble(range, bubble);
+        });
+        const allCheckbox = document.querySelectorAll(".checkbox-wrap input");
+        allCheckbox.forEach( input => {
+          input.checked = false;
+        });
+      }
+    })
   </script>
 {% endblock inline_javascript %}
