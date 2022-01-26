@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.core.paginator import Paginator
 from sockpuppet.reflex import Reflex
 
 
@@ -22,26 +23,35 @@ class MarketReflex(Reflex):
             else:
                 del filters[filter_name]
         self.request.session['filters'] = filters
-        queryset = context['tanks']
-        context['tanks'] = queryset.filter(**filters)
+        queryset = context['paginator'].object_list
+        queryset = queryset.filter(**filters)
+        paginator = Paginator(queryset, 4)
+        context['tanks'] = paginator.page(1)
+        context['paginator'] = paginator
 
     def clear_filters(self):
         context = self.get_context_data()
         self.request.session['filters'] = defaultdict(set)
-        queryset = context['tanks']
-        context['tanks'] = queryset.all()
+        queryset = context['paginator'].object_list
+        queryset = queryset.all()
+        paginator = Paginator(queryset, 4)
+        context['tanks'] = paginator.page(1)
+        context['paginator'] = paginator
 
     def sort(self):
         context = self.get_context_data()
-        queryset = context['tanks']
+        queryset = context['paginator'].object_list
         filters = self.request.session.get('filters', None)
         if filters:
             queryset = queryset.filter(**filters)
         value = self.element.attributes['value']
         match value:
             case 'max_price':
-                context['tanks'] = queryset.order_by('-price')
+                queryset = queryset.order_by('-price')
             case 'min_price':
-                context['tanks'] = queryset.order_by('price')
+                queryset = queryset.order_by('price')
             case _:
-                context['tanks'] = queryset.order_by('-date_mod')
+                queryset = queryset.order_by('-date_mod')
+        paginator = Paginator(queryset, 4)
+        context['tanks'] = paginator.page(1)
+        context['paginator'] = paginator

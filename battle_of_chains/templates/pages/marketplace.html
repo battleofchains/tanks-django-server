@@ -58,7 +58,7 @@
         <div class="title-block">
           <div>
             <div>NFTs For Sale</div>
-            <div class="small-text">{{ tanks|length }} results</div>
+            <div class="small-text">{{ paginator.count }} results</div>
           </div>
           <div>
             <span class="small-text">Sort by</span>
@@ -71,14 +71,14 @@
         </div>
         <hr>
       <div class="row row-cols-4">
-        {% for tank in tanks %}
+        {% for tank in tanks.object_list %}
           <div class="col">
             <div class="card-wrap">
               <div class="card-top" style="background-image: url('{{ tank.image.url }}');">
                 <div>
                   <span class="tank-id"># {{ tank.id }}</span>
                   <span class="tank-type">{{ tank.type }}</span>
-                  <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_left }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
+                  <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
                 </div>
               </div>
               <div class="card-bottom">
@@ -97,6 +97,9 @@
         {% endfor %}
        </div>
       </div>
+      <ul class="pagination">
+
+      </ul>
     </div>
   </div>
 {% endblock %}

@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.db.models import Max, Q
 from django.views.generic import TemplateView
 
@@ -11,9 +12,11 @@ class MarketPlaceView(TemplateView):
         context = super(MarketPlaceView, self).get_context_data(**kwargs)
         tanks = Tank.objects.filter(
             Q(for_sale=True, basic_free_tank=False) | Q(basic_free_tank=True, offer__is_active=True)
-        )
+        ).order_by('-date_mod')
         context['type_filter'] = TankType.objects.values_list('id', 'name')
-        context['tanks'] = tanks.order_by('-date_mod')
+        paginator = Paginator(tanks, 4)
+        context['paginator'] = paginator
+        context['tanks'] = paginator.page(1)
         maxes = [Max(prop) for prop in ('level', 'moving_price', 'overlook', 'armor', 'hp')]
         range_filters = Tank.objects.aggregate(*maxes)
         context['range_filters'] = {k.split('__')[0]: v for k, v in range_filters.items()}
