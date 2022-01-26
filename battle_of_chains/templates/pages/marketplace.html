@@ -3,6 +3,7 @@
 {% block javascript %}
   <script src="{% static 'sockpuppet/sockpuppet.js' %}"></script>
   <script src="{% static 'js/web3.min.js' %}"></script>
+  <script src="{% static 'js/project.js' %}"></script>
 {% endblock %}
 {% block body-class %}black-theme{% endblock %}
 {% block navbar %}
@@ -87,7 +88,7 @@
                   <div class="small-text">{{ tank.type }}</div>
                 </div>
                 <div class="card-bottom-2">
-                  <img src="{% static 'images/cart-btn.png' %}" alt="cart">
+                  <img src="{% static 'images/cart-btn.png' %}" alt="cart" onclick="buy_token({{ tank.id }}, {{ tank.price }})">
                   <div class="tank-price">{{ tank.price }} BNB</div>
                 </div>
               </div>
@@ -144,5 +145,13 @@
         });
       }
     })
+
+    const account = set_account();
+    if (window.ethereum.networkVersion !== '97') {
+      alert('Please select BSC test network');
+    }
+    function buy_token(token_id, price) {
+      contract_buy_token(account, token_id, price);
+    }
   </script>
 {% endblock inline_javascript %}

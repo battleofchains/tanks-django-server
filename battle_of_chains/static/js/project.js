@@ -28,7 +28,9 @@ function get_contract() {
 }
 
 function set_account() {
+    let address;
     getAccount().then(function (account) {
+      address = account;
       const csrftoken = getCookie('csrftoken');
       let xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/wallets/', false);
@@ -36,6 +38,7 @@ function set_account() {
       xhr.setRequestHeader('X-CSRFToken', csrftoken);
       xhr.send("address=" + account);
     });
+    return address;
 }
 
 function getCookie(name) {
@@ -53,55 +56,44 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function contract_buy_token(token_id, price) {
-    const web3 = new Web3(Web3.givenProvider);
-    getAccount().then(function (account) {
-      let myContract = get_contract();
-      let txn = myContract.methods.buy(token_id);
-      let gas = txn.estimateGas({from: account, value: web3.utils.toWei(price)});
-      gas.then(function (gasAmount) {
-        console.log(gasAmount);
-        web3.eth.getTransactionCount(account).then(function (nonce) {
-          console.log(nonce);
-          web3.eth.getGasPrice().then(function (gas_price) {
-            console.log(gas_price);
-            txn.send({
-              gas: gasAmount,
-              from: account,
-              gasPrice: gas_price,
-              nonce: nonce,
-              value: web3.utils.toWei(price)
-            }).then(function(receipt){
-                console.log(receipt);
-            });
-          })
-        })
-       })
-    });
+function contract_buy_token(account, token_id, price) {
+    let myContract = get_contract();
+    let txn = myContract.methods.buy(token_id);
+    make_txn(txn, account, price)
 }
 
-function contract_list_token(token_id) {
+function contract_list_token(account, token_id) {
+    let myContract = get_contract();
+    let txn = myContract.methods.updateListingStatus(token_id, true);
+    make_txn(txn, account, 0)
+}
+
+function contract_set_token_price(account, token_id, price) {
     const web3 = new Web3(Web3.givenProvider);
-    getAccount().then(function (account) {
-      let myContract = get_contract();
-      let txn = myContract.methods.updateListingStatus(token_id, true);
-      let gas = txn.estimateGas({from: account});
-      gas.then(function (gasAmount) {
+    let myContract = get_contract();
+    let txn = myContract.methods.updatePrice(token_id, web3.utils.toWei(price));
+    make_txn(txn, account, price)
+}
+
+function make_txn(txn, account, value) {
+    const web3 = new Web3(Web3.givenProvider);
+    let gas = txn.estimateGas({from: account});
+    gas.then(function (gasAmount) {
         console.log(gasAmount);
         web3.eth.getTransactionCount(account).then(function (nonce) {
-          console.log(nonce);
-          web3.eth.getGasPrice().then(function (gas_price) {
-            console.log(gas_price);
-            txn.send({
-              gas: gasAmount,
-              from: account,
-              gasPrice: gas_price,
-              nonce: nonce
-            }).then(function(receipt){
-                console.log(receipt);
-            });
-          })
+            console.log(nonce);
+            web3.eth.getGasPrice().then(function (gas_price) {
+                console.log(gas_price);
+                txn.send({
+                    gas: gasAmount,
+                    from: account,
+                    gasPrice: gas_price,
+                    nonce: nonce,
+                    value: web3.utils.toWei(value)
+                }).then(function(receipt){
+                    console.log(receipt);
+                });
+            })
         })
-       })
     });
 }

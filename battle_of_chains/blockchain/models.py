@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from django.db import models
 
 from battle_of_chains.battle.models import Tank
@@ -53,7 +55,8 @@ class NFT(models.Model):
     @property
     def link(self):
         if self.contract:
-            return f"{self.contract.network.url_explorer}/token/{self.contract.address}?a={self.tank_id}"
+            path = f"/token/{self.contract.address}?a={self.tank_id}"
+            return urljoin(self.contract.network.url_explorer, path)
         return ''
 
 
