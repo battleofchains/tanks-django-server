@@ -12,6 +12,7 @@ class MarketReflex(Reflex):
         filter_name = self.element.dataset['filter']
         filter_value = self.element.attributes['value']
         filters = self.request.session.get('filters', defaultdict(set))
+        order_by = self.request.session.get('order_by', '-date_add')
         if self.element.attributes['type'] == 'checkbox':
             if self.element.attributes['checked']:
                 filters[filter_name].add(filter_value)
@@ -26,8 +27,9 @@ class MarketReflex(Reflex):
                 del filters[filter_name]
         self.request.session['filters'] = filters
         queryset = context['paginator'].object_list
-        queryset = queryset.filter(**filters)
+        queryset = queryset.filter(**filters).order_by(order_by)
         paginator = Paginator(queryset, BattleSettings.get_solo().tanks_per_page)
+        context['order_by'] = order_by
         context['tanks'] = paginator.page(1)
         context['paginator'] = paginator
 
@@ -47,13 +49,24 @@ class MarketReflex(Reflex):
         if filters:
             queryset = queryset.filter(**filters)
         value = self.element.attributes['value']
-        match value:
-            case 'max_price':
-                queryset = queryset.order_by('-price')
-            case 'min_price':
-                queryset = queryset.order_by('price')
-            case _:
-                queryset = queryset.order_by('-date_mod')
+        queryset = queryset.order_by(value)
+        self.request.session['order_by'] = value
+        context['order_by'] = value
         paginator = Paginator(queryset, BattleSettings.get_solo().tanks_per_page)
         context['tanks'] = paginator.page(1)
         context['paginator'] = paginator
+
+    def page(self):
+        context = self.get_context_data()
+        filters = self.request.session.get('filters', None)
+        order_by = self.request.session.get('order_by', '-date_add')
+        page_number = self.element.dataset['page']
+        context['order_by'] = order_by
+        paginator = context['paginator']
+        queryset = paginator.object_list
+        if filters:
+            queryset = queryset.filter(**filters)
+        queryset = queryset.order_by(order_by)
+        paginator = Paginator(queryset, BattleSettings.get_solo().tanks_per_page)
+        context['paginator'] = paginator
+        context['tanks'] = paginator.page(int(page_number))

@@ -63,14 +63,14 @@
           <div>
             <span class="small-text">Sort by</span>
             <select data-reflex="change->MarketReflex#sort">
-              <option value="newest" selected>Newest</option>
-              <option value="min_price"> Min Price</option>
-              <option value="max_price"> Max Price</option>
+            {% for val, name in orders.items %}
+              <option value="{{ val }}" {% if order_by == val %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
             </select>
           </div>
         </div>
         <hr>
-      <div class="row row-cols-4">
+        <div class="row row-cols-4">
         {% for tank in tanks %}
           <div class="col">
             <div class="card-wrap">
@@ -95,13 +95,15 @@
           </div>
 
         {% endfor %}
-       </div>
+        </div>
+        <ul class="pagination">
+          {% for page in paginator %}
+            <li class="page-item {% if page.number == tanks.number %}active{% endif %}">
+              <button class="page-link" data-reflex="click->MarketReflex#page" data-page="{{ page.number }}">{{ page.number }}</button>
+            </li>
+          {% endfor %}
+        </ul>
       </div>
-      <ul class="pagination">
-        {% for page in paginator %}
-          <li class="page-item {% if page.number == tanks.number %}active{% endif %}">{{ page.number }}</li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
 {% endblock %}

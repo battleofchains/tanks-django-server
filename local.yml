@@ -15,7 +15,7 @@ services:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
     image: battle_of_chains_local_django
-    container_name: django
+    container_name: django-tanks
     depends_on:
       - postgres
     volumes:
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: battle_of_chains_production_postgres
-    container_name: postgres
+    container_name: postgres-tanks
     volumes:
       - local_postgres_data:/var/lib/postgresql/data:Z
       - local_postgres_data_backups:/backups:z
@@ -45,7 +45,7 @@ services:
 
   redis:
     image: redis:6
-    container_name: redis
+    container_name: redis-tanks
     networks:
       - tanks
 
@@ -104,7 +104,7 @@ services:
   celeryworker:
     <<: *django
     image: battle_of_chains_local_celeryworker
-    container_name: celeryworker
+    container_name: celeryworker-tanks
     depends_on:
       - redis
       - postgres
@@ -114,7 +114,7 @@ services:
   celerybeat:
     <<: *django
     image: battle_of_chains_local_celerybeat
-    container_name: celerybeat
+    container_name: celerybeat-tanks
     depends_on:
       - redis
       - postgres
