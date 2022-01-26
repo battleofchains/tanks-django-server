@@ -3,6 +3,8 @@ from collections import defaultdict
 from django.core.paginator import Paginator
 from sockpuppet.reflex import Reflex
 
+from battle_of_chains.battle.models import BattleSettings
+
 
 class MarketReflex(Reflex):
     def filter(self):
@@ -25,7 +27,7 @@ class MarketReflex(Reflex):
         self.request.session['filters'] = filters
         queryset = context['paginator'].object_list
         queryset = queryset.filter(**filters)
-        paginator = Paginator(queryset, 4)
+        paginator = Paginator(queryset, BattleSettings.get_solo().tanks_per_page)
         context['tanks'] = paginator.page(1)
         context['paginator'] = paginator
 
@@ -34,7 +36,7 @@ class MarketReflex(Reflex):
         self.request.session['filters'] = defaultdict(set)
         queryset = context['paginator'].object_list
         queryset = queryset.all()
-        paginator = Paginator(queryset, 4)
+        paginator = Paginator(queryset, BattleSettings.get_solo().tanks_per_page)
         context['tanks'] = paginator.page(1)
         context['paginator'] = paginator
 
@@ -52,6 +54,6 @@ class MarketReflex(Reflex):
                 queryset = queryset.order_by('price')
             case _:
                 queryset = queryset.order_by('-date_mod')
-        paginator = Paginator(queryset, 4)
+        paginator = Paginator(queryset, BattleSettings.get_solo().tanks_per_page)
         context['tanks'] = paginator.page(1)
         context['paginator'] = paginator

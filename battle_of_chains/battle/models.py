@@ -172,6 +172,7 @@ class Country(models.Model):
 
 class BattleSettings(SingletonModel):
     time_to_move = models.PositiveSmallIntegerField(verbose_name='Time to make move, seconds', default=45)
+    tanks_per_page = models.PositiveSmallIntegerField(verbose_name='Tanks per page in marketplace', default=14)
 
     def __str__(self):
-        return 'Global battle settings'
+        return 'Global settings'

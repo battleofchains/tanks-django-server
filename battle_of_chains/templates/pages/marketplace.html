@@ -71,10 +71,10 @@
         </div>
         <hr>
       <div class="row row-cols-4">
-        {% for tank in tanks.object_list %}
+        {% for tank in tanks %}
           <div class="col">
             <div class="card-wrap">
-              <div class="card-top" style="background-image: url('{{ tank.image.url }}');">
+              <div class="card-top" style="background-image: url('{% if tank.image %}{{ tank.image.url }}{% endif %}');">
                 <div>
                   <span class="tank-id"># {{ tank.id }}</span>
                   <span class="tank-type">{{ tank.type }}</span>
@@ -98,7 +98,9 @@
        </div>
       </div>
       <ul class="pagination">
-
+        {% for page in paginator %}
+          <li class="page-item {% if page.number == tanks.number %}active{% endif %}">{{ page.number }}</li>
+        {% endfor %}
       </ul>
     </div>
   </div>

@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 from django.db.models import Max, Q
 from django.views.generic import TemplateView
 
-from battle_of_chains.battle.models import Tank, TankType
+from battle_of_chains.battle.models import BattleSettings, Tank, TankType
 
 
 class MarketPlaceView(TemplateView):
@@ -10,11 +10,12 @@ class MarketPlaceView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(MarketPlaceView, self).get_context_data(**kwargs)
+        battle_settings = BattleSettings.get_solo()
         tanks = Tank.objects.filter(
             Q(for_sale=True, basic_free_tank=False) | Q(basic_free_tank=True, offer__is_active=True)
         ).order_by('-date_mod')
         context['type_filter'] = TankType.objects.values_list('id', 'name')
-        paginator = Paginator(tanks, 4)
+        paginator = Paginator(tanks, battle_settings.tanks_per_page)
         context['paginator'] = paginator
         context['tanks'] = paginator.page(1)
         maxes = [Max(prop) for prop in ('level', 'moving_price', 'overlook', 'armor', 'hp')]
