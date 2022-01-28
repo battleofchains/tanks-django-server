@@ -62,6 +62,12 @@ function contract_buy_token(account, token_id, price) {
     make_txn(txn, account, price)
 }
 
+function contract_buy_mint_token(account, token_id, token_uri, price) {
+    let myContract = get_contract();
+    let txn = myContract.methods.buyAndMint(token_id, token_uri, price);
+    make_txn(txn, account, price)
+}
+
 function contract_list_token(account, token_id) {
     let myContract = get_contract();
     let txn = myContract.methods.updateListingStatus(token_id, true);
@@ -96,4 +102,28 @@ function make_txn(txn, account, value) {
             })
         })
     });
+}
+
+function buy_token(token_id, price) {
+  if (window.ethereum.networkVersion !== '97') {
+    alert('Please select BSC test network in MetaMask');
+  } else {
+    contract_buy_token(account, token_id, price);
+  }
+}
+function buy_and_mint_token(tank_id, token_uri, price) {
+  if (window.ethereum.networkVersion !== '97') {
+    alert('Please select BSC test network in MetaMask');
+  } else {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/new_token_id/' + tank_id, false);
+    xhr.send();
+    if (xhr.status !== 200) {
+      console.log( xhr.status + ': ' + xhr.statusText );
+    } else {
+      let data = JSON.parse(xhr.responseText);
+      const token_id = data['token_id']
+      contract_buy_mint_token(account, token_id, token_uri, price);
+    }
+  }
 }

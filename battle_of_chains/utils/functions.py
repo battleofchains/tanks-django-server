@@ -1,6 +1,7 @@
 import random
 
 from battle_of_chains.battle.models import Tank
+from battle_of_chains.market.models import Offer
 from battle_of_chains.users.models import User
 
 
@@ -23,3 +24,17 @@ def generate_first_squad(instance: User):
                 projectile.pk = None
                 projectile.tank = tank
                 projectile.save()
+
+
+def create_tank_from_offer(offer: Offer) -> Tank:
+    base_tank = offer.base_tank
+    props = {k: v for k, v in base_tank.__dict__.items() if not k.startswith('_') and k not in
+             ('id', 'owner_id', 'price', 'basic_free_tank', 'origin_offer_id', 'date_mod')}
+    props['price'] = offer.price
+    props['origin_offer_id'] = offer.id
+    tank = Tank.objects.create(**props)
+    for projectile in base_tank.projectiles.all():
+        projectile.pk = None
+        projectile.tank = tank
+        projectile.save()
+    return tank

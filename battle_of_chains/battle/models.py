@@ -1,6 +1,10 @@
+from urllib.parse import urljoin
+
 from colorful.fields import RGBColorField
+from django.conf import settings
 from django.core.validators import MaxValueValidator
 from django.db import models
+from django.urls import reverse
 from PIL import Image
 from solo.models import SingletonModel
 
@@ -99,6 +103,7 @@ class Tank(models.Model):
     country = models.ForeignKey('Country', on_delete=models.SET_NULL, null=True, blank=True)
     origin_offer = models.ForeignKey('market.Offer', on_delete=models.SET_NULL, null=True, blank=True)
     date_mod = models.DateTimeField(auto_now=True, verbose_name='Modified')
+    date_add = models.DateTimeField(auto_now_add=True, verbose_name='Created')
 
     def __str__(self):
         return f"{self.owner or None} | {self.name}" if self.name \
@@ -118,6 +123,17 @@ class Tank(models.Model):
                     if getattr(old, image_field, None) != image:
                         img = Image.open(image.path)
                         img.save(image.path, optimize=True)
+
+    @property
+    def nft_meta_url(self):
+        return urljoin(settings.SITE_URL, reverse('api:nft_meta-detail', args=[self.id]))
+
+    def has_nft(self):
+        if self.basic_free_tank:
+            return False
+        if hasattr(self, "nft"):
+            return True
+        return False
 
 
 class ProjectileType(models.Model):

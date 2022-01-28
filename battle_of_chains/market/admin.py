@@ -5,7 +5,7 @@ from .models import Offer, Tank
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'amount', 'amount_sold', 'is_active')
+    list_display = ('id', 'title', 'amount', 'price', 'amount_sold', 'is_active')
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super(OfferAdmin, self).get_form(request, obj, change, **kwargs)
