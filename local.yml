@@ -28,6 +28,11 @@ services:
     ports:
       - "8000:8000"
     command: /start
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "2"
 
   postgres:
     build:
@@ -42,12 +47,22 @@ services:
       - tanks
     env_file:
       - ./.envs/.local/.postgres
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   redis:
     image: redis:6
     container_name: redis-tanks
     networks:
       - tanks
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   elasticsearch:
     build:
@@ -64,6 +79,11 @@ services:
       - ./.envs/.local/.elk
     networks:
       - tanks
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "2"
 
   logstash:
     build:
@@ -84,6 +104,11 @@ services:
       - tanks
     depends_on:
       - elasticsearch
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"
 
   kibana:
     build:
@@ -100,6 +125,11 @@ services:
       - tanks
     depends_on:
       - elasticsearch
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   celeryworker:
     <<: *django
@@ -110,6 +140,11 @@ services:
       - postgres
     ports: []
     command: /start-celeryworker
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
 
   celerybeat:
     <<: *django
@@ -120,6 +155,11 @@ services:
       - postgres
     ports: []
     command: /start-celerybeat
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "1"
 
 #  flower:
 #    <<: *django
