@@ -18,7 +18,7 @@ class WalletAdmin(AdminNoChangeMixin, admin.ModelAdmin):
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('name', 'symbol', 'address', 'network', 'is_active')
+    list_display = ('name', 'symbol', 'contract_url', 'network', 'is_active')
     actions = ('deploy_contracts',)
 
     def deploy_contracts(self, request, queryset):
@@ -35,3 +35,4 @@ class NFTAdmin(AdminNoChangeMixin, admin.ModelAdmin):
 @admin.register(BlockchainEvent)
 class BlockchainLogAdmin(AdminNoChangeMixin, admin.ModelAdmin):
     list_filter = ('event',)
+    list_display = ('tx_hash', 'event', 'args')

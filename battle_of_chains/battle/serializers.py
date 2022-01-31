@@ -8,7 +8,7 @@ from rest_framework.status import HTTP_409_CONFLICT
 
 from battle_of_chains.utils.functions import create_tank_from_offer
 
-from .models import BattleType, Map, Projectile, ProjectileType, Tank, TankType
+from .models import BattleSettings, BattleType, Map, Projectile, ProjectileType, Tank, TankType
 
 
 class TankTokenException(APIException):
@@ -76,7 +76,7 @@ class TankNftMetaSerializer(serializers.ModelSerializer):
         )
 
     def get_symbol(self, obj):
-        return 'BOFCNFT'
+        return BattleSettings.get_solo().nft_ticker
 
     def get_description(self, obj):
         return 'Battle of Chains tank NFT'

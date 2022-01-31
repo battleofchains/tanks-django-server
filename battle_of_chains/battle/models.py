@@ -135,6 +135,11 @@ class Tank(models.Model):
             return True
         return False
 
+    def has_offer(self):
+        if hasattr(self, 'offer'):
+            return True
+        return False
+
 
 class ProjectileType(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -189,6 +194,11 @@ class Country(models.Model):
 class BattleSettings(SingletonModel):
     time_to_move = models.PositiveSmallIntegerField(verbose_name='Time to make move, seconds', default=45)
     tanks_per_page = models.PositiveSmallIntegerField(verbose_name='Tanks per page in marketplace', default=14)
+    nft_ticker = models.CharField(max_length=10, default='TNKNFT', verbose_name='NFT contract Ticker')
 
     def __str__(self):
         return 'Global settings'
+
+    class Meta:
+        verbose_name = 'Global Settings'
+        verbose_name_plural = 'Global Settings'

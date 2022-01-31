@@ -89,8 +89,8 @@
                 </div>
                 <div class="card-bottom-2">
                   <img src="{% static 'images/cart-btn.png' %}" alt="cart"
-                       onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, {{ tank.nft_meta_url }}, {{ tank.price }}){% endif %}">
-                  <div class="tank-price">{{ tank.price }} BNB</div>
+                       onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}">
+                  <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %} BNB</div>
                 </div>
               </div>
             </div>
@@ -147,9 +147,11 @@
       }
     })
 
-    const account = set_account();
-    if (window.ethereum.networkVersion !== '97') {
-      alert('Please select BSC test network in MetaMask');
-    }
+    set_account().then(result => {
+      console.log(result);
+      if (window.ethereum.networkVersion !== '97') {
+        alert('Please select BSC test network in MetaMask');
+      }
+    }).catch(err => {console.log(err)});
   </script>
 {% endblock inline_javascript %}

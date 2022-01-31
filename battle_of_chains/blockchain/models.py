@@ -33,7 +33,6 @@ class Contract(models.Model):
     symbol = models.CharField(max_length=50, default='')
     contract_definitions = models.JSONField()
     address = models.CharField(max_length=42, verbose_name='Contract address', blank=True, null=True)
-    contract_url = models.URLField(verbose_name='Contract URL', blank=True, null=True)
     network = models.ForeignKey(Network, on_delete=models.PROTECT)
     date_add = models.DateTimeField(auto_now_add=True, verbose_name='Creation date')
     last_modified = models.DateTimeField(auto_now=True, verbose_name='Last update')
@@ -41,6 +40,13 @@ class Contract(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def contract_url(self):
+        if self.address:
+            path = f"/address/{self.address}/"
+            return urljoin(self.network.url_explorer, path)
+        return ''
 
 
 class NFT(models.Model):

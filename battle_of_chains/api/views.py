@@ -89,6 +89,10 @@ class WalletViewSet(RetrieveModelMixin, ListModelMixin, CreateModelMixin, Update
             )
             wallet.save()
             if request.user.wallet != wallet:
+                if hasattr(wallet, 'user'):
+                    old_owner = wallet.user
+                    old_owner.wallet = None
+                    old_owner.save()
                 request.user.wallet = wallet
                 request.user.save()
         except Wallet.DoesNotExist:
