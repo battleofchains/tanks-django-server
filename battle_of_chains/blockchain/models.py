@@ -1,3 +1,4 @@
+import uuid
 from urllib.parse import urljoin
 
 from django.db import models
@@ -67,9 +68,13 @@ class NFT(models.Model):
 
 
 class BlockchainEvent(models.Model):
-    tx_hash = models.CharField(max_length=100, verbose_name='Transaction Hash', primary_key=True)
+    uuid = models.UUIDField(verbose_name='ID', default=uuid.uuid4, primary_key=True)
+    tx_hash = models.CharField(max_length=100, verbose_name='Transaction Hash', editable=False)
     event = models.CharField(max_length=100, verbose_name='Event name', editable=False)
     args = models.JSONField(editable=False)
     block_number = models.PositiveIntegerField(default=1, editable=False)
     timestamp = models.PositiveIntegerField(editable=False, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, editable=False)
+
+    class Meta:
+        unique_together = ('tx_hash', 'event')

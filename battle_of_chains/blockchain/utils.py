@@ -100,17 +100,25 @@ def process_event_data(event: str, data: dict):
             new_owner_address = args['newOwner']
             nft_id = args['nftID']
             price = args['price']
+            wallet, _ = Wallet.objects.get_or_create(address__iexact=new_owner_address)
             try:
                 tank = Tank.objects.get(id=nft_id)
-                new_owner = User.objects.get(wallet__address__iexact=new_owner_address)
+                contract = Contract.objects.get(address__iexact=data['address'])
+                new_owner = User.objects.get(wallet=wallet)
+                try:
+                    NFT.objects.get(tank=tank)
+                except NFT.DoesNotExist:
+                    NFT.objects.create(tank=tank, owner=wallet, contract=contract,
+                                       tx_hash=data['transactionHash'].hex())
             except Tank.DoesNotExist:
                 logger.error(f'Tank with id {nft_id} does not exist')
+            except Contract.DoesNotExist:
+                logger.error(f"Contract with address {data['address']} does not exist")
             except User.DoesNotExist:
                 logger.error(f'User with wallet address {new_owner_address} does not exist')
                 tank.owner = None
                 tank.price = Web3.fromWei(price, 'ether')
                 tank.save()
-                wallet, _ = Wallet.objects.get_or_create(address__iexact=new_owner_address)
                 tank.nft.owner = wallet
                 tank.nft.save()
             else:
@@ -166,7 +174,7 @@ def read_contract_events(contract: Contract):
     smart_contract = w3.eth.contract(
         abi=contract.contract_definitions['abi'], address=w3.toChecksumAddress(contract.address)
     )
-    for event in ('Purchase', 'Minted', 'PriceUpdate', 'NftListStatus'):
+    for event in ('Minted', 'Purchase', 'PriceUpdate', 'NftListStatus'):
         last_block = BlockchainEvent.objects.filter(contract=contract, event=event)\
             .aggregate(last_block=Max('block_number'))['last_block'] or 0
         last_block = max(last_block, w3.eth.get_block_number() - 4900)
@@ -176,8 +184,8 @@ def read_contract_events(contract: Contract):
             args = entry['args']
             be, created = BlockchainEvent.objects.get_or_create(
                 tx_hash=entry['transactionHash'].hex(),
+                event=event,
                 defaults={'contract': contract,
-                          'event': event,
                           'block_number': entry['blockNumber'],
                           'args': w3.toJSON(args)}
             )
