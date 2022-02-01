@@ -6,11 +6,10 @@
       "name": "Heavy",
       "hp_step": 200,
       "max_equipment": 1,
-      "damage_bonus_default": 1,
       "critical_chance_default": 1,
       "overlook_default": 3,
       "armor_default": 50,
-      "block_chance_default": 10,
+      "rebound_chance_default": 10,
       "moving_price_default": 3
     }
   },
@@ -21,11 +20,10 @@
       "name": "Light",
       "hp_step": 100,
       "max_equipment": 2,
-      "damage_bonus_default": 1,
       "critical_chance_default": 1,
       "overlook_default": 3,
       "armor_default": 50,
-      "block_chance_default": 1,
+      "rebound_chance_default": 1,
       "moving_price_default": 1
     }
   },
@@ -36,11 +34,10 @@
       "name": "Artillery",
       "hp_step": 100,
       "max_equipment": 1,
-      "damage_bonus_default": 10,
       "critical_chance_default": 10,
       "overlook_default": 3,
       "armor_default": 40,
-      "block_chance_default": 1,
+      "rebound_chance_default": 1,
       "moving_price_default": 4
     }
   }
