@@ -18,7 +18,11 @@
         <div class="col">Download</div>
       </div>
       <div class="login">
-        <a href="/accounts/login/">Log In</a>
+        {% if request.user.is_authenticated %}
+          <a href="/accounts/logout/?next=/marketplace/">Log Out</a>
+        {% else %}
+          <a href="/accounts/login/?next=/marketplace/">Log In</a>
+        {% endif %}
       </div>
     </div>
   </nav>
@@ -89,7 +93,12 @@
                 </div>
                 <div class="card-bottom-2">
                   <img src="{% static 'images/cart-btn.png' %}" alt="cart"
-                       onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}">
+                    {% if request.user.is_authenticated %}
+                       onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
+                    {% else %}
+                       onclick="window.location.href='/accounts/login/?next=/marketplace/'"
+                    {% endif %}
+                  >
                   <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %} BNB</div>
                 </div>
               </div>
@@ -146,12 +155,13 @@
         });
       }
     })
-
-    set_account().then(result => {
-      console.log(result);
-      if (window.ethereum.networkVersion !== '97') {
-        alert('Please select BSC test network in MetaMask');
-      }
-    }).catch(err => {console.log(err)});
+    {% if request.user.is_authenticated %}
+      set_account().then(result => {
+        console.log(result);
+        if (window.ethereum.networkVersion !== '97') {
+          alert('Please select BSC test network in MetaMask');
+        }
+      }).catch(err => {console.log(err)});
+    {% endif %}
   </script>
 {% endblock inline_javascript %}
