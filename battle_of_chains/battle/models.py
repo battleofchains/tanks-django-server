@@ -65,14 +65,12 @@ class TankType(models.Model):
     hp_step = models.PositiveSmallIntegerField(default=100)
     max_equipment = models.PositiveSmallIntegerField(default=1)
     moving_price_default = models.PositiveIntegerField(default=1)
-    damage_bonus_default = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus default, %',
-                                                            validators=[MaxValueValidator(100)])
     critical_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance default, %",
                                                                validators=[MaxValueValidator(100)])
     overlook_default = models.PositiveSmallIntegerField(default=3, verbose_name='Number of hex view default')
     armor_default = models.PositiveSmallIntegerField(default=50)
-    block_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block default, %',
-                                                            validators=[MaxValueValidator(100)])
+    rebound_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Rebound chance default, %',
+                                                              validators=[MaxValueValidator(100)])
 
     def __str__(self):
         return self.name
@@ -84,14 +82,12 @@ class Tank(models.Model):
     owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name='tanks', null=True, blank=True)
     hp = models.PositiveIntegerField(default=100)
     moving_price = models.PositiveIntegerField(default=1)
-    damage_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Damage bonus, %',
-                                                    validators=[MaxValueValidator(100)])
     critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %",
                                                        validators=[MaxValueValidator(100)])
     overlook = models.PositiveSmallIntegerField(default=3, verbose_name='Number of hex view')
     armor = models.PositiveIntegerField(default=50)
-    block_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Chance to block, %',
-                                                    validators=[MaxValueValidator(100)])
+    rebound_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Rebound chance, %',
+                                                      validators=[MaxValueValidator(100)])
     level = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(15)])
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
     for_sale = models.BooleanField(default=False)

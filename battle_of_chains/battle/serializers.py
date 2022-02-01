@@ -87,7 +87,7 @@ class TankNftMetaSerializer(serializers.ModelSerializer):
     def get_attributes(self, obj):
         attributes = []
         for attr in (
-            'level', 'hp', 'armor', 'moving_price', 'damage_bonus', 'critical_chance', 'overlook', 'block_chance'
+            'level', 'hp', 'armor', 'moving_price', 'critical_chance', 'overlook', 'rebound_chance'
         ):
             value = getattr(obj, attr)
             attributes.append({'trait_type': attr, 'value': value})
