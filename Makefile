@@ -47,3 +47,6 @@ bash:
 
 django-logs:
 	$(COMPOSE) logs --tail 100 django
+
+celery-logs:
+	$(COMPOSE) logs --tail 100 celeryworker

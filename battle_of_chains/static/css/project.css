@@ -117,6 +117,7 @@
 }
 .card-bottom-2 > img {
   float: right;
+  cursor: pointer;
 }
 .title-block {
   display: flex;

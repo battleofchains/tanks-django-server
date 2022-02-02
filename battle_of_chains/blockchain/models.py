@@ -1,3 +1,6 @@
+import uuid
+from urllib.parse import urljoin
+
 from django.db import models
 
 from battle_of_chains.battle.models import Tank
@@ -31,7 +34,6 @@ class Contract(models.Model):
     symbol = models.CharField(max_length=50, default='')
     contract_definitions = models.JSONField()
     address = models.CharField(max_length=42, verbose_name='Contract address', blank=True, null=True)
-    contract_url = models.URLField(verbose_name='Contract URL', blank=True, null=True)
     network = models.ForeignKey(Network, on_delete=models.PROTECT)
     date_add = models.DateTimeField(auto_now_add=True, verbose_name='Creation date')
     last_modified = models.DateTimeField(auto_now=True, verbose_name='Last update')
@@ -39,6 +41,13 @@ class Contract(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def contract_url(self):
+        if self.address:
+            path = f"/address/{self.address}/"
+            return urljoin(self.network.url_explorer, path)
+        return ''
 
 
 class NFT(models.Model):
@@ -53,14 +62,19 @@ class NFT(models.Model):
     @property
     def link(self):
         if self.contract:
-            return f"{self.contract.network.url_explorer}/token/{self.contract.address}?a={self.tank_id}"
+            path = f"/token/{self.contract.address}?a={self.tank_id}"
+            return urljoin(self.contract.network.url_explorer, path)
         return ''
 
 
 class BlockchainEvent(models.Model):
-    tx_hash = models.CharField(max_length=100, verbose_name='Transaction Hash', primary_key=True)
+    uuid = models.UUIDField(verbose_name='ID', default=uuid.uuid4, primary_key=True)
+    tx_hash = models.CharField(max_length=100, verbose_name='Transaction Hash', editable=False)
     event = models.CharField(max_length=100, verbose_name='Event name', editable=False)
     args = models.JSONField(editable=False)
     block_number = models.PositiveIntegerField(default=1, editable=False)
     timestamp = models.PositiveIntegerField(editable=False, null=True)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, editable=False)
+
+    class Meta:
+        unique_together = ('tx_hash', 'event')

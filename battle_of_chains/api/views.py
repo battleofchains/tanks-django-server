@@ -16,6 +16,7 @@ from battle_of_chains.battle.serializers import (
     ProjectileSerializer,
     TankNftMetaSerializer,
     TankSerializer,
+    TankNewTokenIdSerializer,
 )
 from battle_of_chains.blockchain.models import Contract, Wallet
 from battle_of_chains.blockchain.serializers import ContractSerializer, WalletSerializer
@@ -88,6 +89,10 @@ class WalletViewSet(RetrieveModelMixin, ListModelMixin, CreateModelMixin, Update
             )
             wallet.save()
             if request.user.wallet != wallet:
+                if hasattr(wallet, 'user'):
+                    old_owner = wallet.user
+                    old_owner.wallet = None
+                    old_owner.save()
                 request.user.wallet = wallet
                 request.user.save()
         except Wallet.DoesNotExist:
@@ -100,3 +105,8 @@ class WalletViewSet(RetrieveModelMixin, ListModelMixin, CreateModelMixin, Update
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
             return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+
+
+class TankNewTokenIdViewSet(RetrieveModelMixin, GenericViewSet):
+    serializer_class = TankNewTokenIdSerializer
+    queryset = Tank.objects.all()

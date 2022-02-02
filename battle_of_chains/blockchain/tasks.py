@@ -35,10 +35,11 @@ def mint_nft_task(self, tank_id):
         waited += 5
 
     try:
-        tank = Tank.objects.get(tank_id)
+        tank = Tank.objects.get(pk=tank_id)
         mint_nft(tank)
     except Exception as e:
-        logger.error(f'Cannot mint tank {tank_id}. Error: {e}')
+        logger.exception(f'Cannot mint tank {tank_id}. Error: {e}')
+        raise e
     finally:
         cache.delete(self.name)
 

@@ -74,7 +74,7 @@ class ProjectileInline(admin.TabularInline):
 
 @admin.register(Tank)
 class TankAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'type', 'level', 'owner', 'date_mod')
+    list_display = ('id', 'name', 'type', 'level', 'hp', 'moving_price', 'overlook', 'armor', 'country', 'owner')
     inlines = [ProjectileInline]
     actions = ('mint_nft',)
     list_filter = (HasOwnerFilter, 'type', 'basic_free_tank', 'for_sale', 'origin_offer')
@@ -85,7 +85,7 @@ class TankAdmin(admin.ModelAdmin):
         for obj in queryset:
             try:
                 mint_nft_task(obj.id)
-                self.message_user(request, f"NFT for tank {obj} is minting", level=messages.INFO)
+                self.message_user(request, f"NFT for tank {obj} successfully minted", level=messages.INFO)
             except Exception as e:
                 self.message_user(request, f"Error occurred while trying to mint {obj}: {e} ", level=messages.ERROR)
                 logger.error(traceback.format_exc())
