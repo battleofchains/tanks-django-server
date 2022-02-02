@@ -68,7 +68,7 @@ class TankType(models.Model):
     critical_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance default, %",
                                                                validators=[MaxValueValidator(100)])
     overlook_default = models.PositiveSmallIntegerField(default=3, verbose_name='Number of hex view default')
-    armor_default = models.PositiveSmallIntegerField(default=50)
+    armor_default = models.PositiveSmallIntegerField(default=100)
     rebound_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Rebound chance default, %',
                                                               validators=[MaxValueValidator(100)])
 
@@ -86,7 +86,7 @@ class Tank(models.Model):
     critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %",
                                                        validators=[MaxValueValidator(100)])
     overlook = models.PositiveSmallIntegerField(default=3, verbose_name='Number of hex view')
-    armor = models.PositiveIntegerField(default=50)
+    armor = models.PositiveIntegerField(default=100)
     rebound_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Rebound chance, %',
                                                       validators=[MaxValueValidator(100)])
     level = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(15)])
@@ -145,9 +145,7 @@ class ProjectileType(models.Model):
     avg_damage_default = models.PositiveIntegerField(default=10)
     distance_default = models.PositiveSmallIntegerField(default=5)
     environment_damage_default = models.PositiveIntegerField(default=15)
-    critical_hit_bonus_default = models.PositiveSmallIntegerField(default=1,
-                                                                  verbose_name='Critical hit bonus default, %',
-                                                                  validators=[MaxValueValidator(100)])
+    penetration_default = models.PositiveSmallIntegerField(default=50)
     radius_default = models.PositiveSmallIntegerField(default=1)
     ricochet_chance_default = models.PositiveSmallIntegerField(default=10,
                                                                verbose_name='Ricochet chance default, %',
@@ -163,8 +161,7 @@ class Projectile(models.Model):
     avg_damage = models.PositiveIntegerField(default=10)
     distance = models.PositiveSmallIntegerField(default=5)
     environment_damage = models.PositiveIntegerField(default=15)
-    critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %',
-                                                          validators=[MaxValueValidator(100)])
+    penetration = models.PositiveSmallIntegerField(default=50)
     ammo = models.PositiveIntegerField(default=10)
     radius = models.PositiveSmallIntegerField(default=1)
     ricochet_chance = models.PositiveSmallIntegerField(default=10,

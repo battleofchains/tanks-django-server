@@ -5,6 +5,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 from django.views import defaults as default_views
 
+admin.site.site_header = 'Battle of Chains'
+
 urlpatterns = [
     path("", include("battle_of_chains.front.urls", namespace="front")),
     path("", include("battle_of_chains.market.urls", namespace="market")),

@@ -76,7 +76,7 @@ class ProjectileInline(admin.TabularInline):
 class TankAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'level', 'hp', 'moving_price', 'overlook', 'armor', 'country', 'owner')
     inlines = [ProjectileInline]
-    actions = ('mint_nft',)
+    actions = ('mint_nft', 'copy_tanks')
     list_filter = (HasOwnerFilter, 'type', 'basic_free_tank', 'for_sale', 'origin_offer')
     readonly_fields = ('origin_offer',)
     search_fields = ('owner__email', 'id')
@@ -89,6 +89,18 @@ class TankAdmin(admin.ModelAdmin):
             except Exception as e:
                 self.message_user(request, f"Error occurred while trying to mint {obj}: {e} ", level=messages.ERROR)
                 logger.error(traceback.format_exc())
+
+    def copy_tanks(self, request, queryset):
+        for obj in queryset:
+            projectiles = tuple(obj.projectiles.all())
+            obj.pk = None
+            obj.owner = None
+            obj.origin_offer = None
+            obj.save()
+            for projectile in projectiles:
+                projectile.pk = None
+                projectile.tank = obj
+                projectile.save()
 
 
 @admin.register(ProjectileType)
