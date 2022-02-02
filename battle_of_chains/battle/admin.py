@@ -74,7 +74,7 @@ class ProjectileInline(admin.TabularInline):
 
 @admin.register(Tank)
 class TankAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'type', 'level', 'owner', 'date_mod')
+    list_display = ('id', 'name', 'type', 'level', 'hp', 'moving_price', 'overlook', 'armor', 'country', 'owner')
     inlines = [ProjectileInline]
     actions = ('mint_nft',)
     list_filter = (HasOwnerFilter, 'type', 'basic_free_tank', 'for_sale', 'origin_offer')
