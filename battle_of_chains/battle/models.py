@@ -78,6 +78,7 @@ class TankType(models.Model):
 
 class Tank(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
+    type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name='tanks', null=True, blank=True)
     hp = models.PositiveIntegerField(default=100)
@@ -89,7 +90,7 @@ class Tank(models.Model):
     rebound_chance = models.PositiveSmallIntegerField(default=1, verbose_name='Rebound chance, %',
                                                       validators=[MaxValueValidator(100)])
     level = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(15)])
-    type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
+    ammo = models.PositiveIntegerField(default=50)
     for_sale = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     sprite = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
