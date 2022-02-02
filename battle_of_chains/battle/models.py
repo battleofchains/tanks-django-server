@@ -148,11 +148,11 @@ class ProjectileType(models.Model):
     critical_hit_bonus_default = models.PositiveSmallIntegerField(default=1,
                                                                   verbose_name='Critical hit bonus default, %',
                                                                   validators=[MaxValueValidator(100)])
-    radius_default = models.PositiveSmallIntegerField(default=0)
-    ricochet_chance_default = models.PositiveSmallIntegerField(default=1,
+    radius_default = models.PositiveSmallIntegerField(default=1)
+    ricochet_chance_default = models.PositiveSmallIntegerField(default=10,
                                                                verbose_name='Ricochet chance default, %',
                                                                validators=[MaxValueValidator(100)])
-    fire_price_default = models.PositiveIntegerField(default=1)
+    fire_price_default = models.PositiveIntegerField(default=2)
 
     def __str__(self):
         return self.name
@@ -166,12 +166,12 @@ class Projectile(models.Model):
     critical_hit_bonus = models.PositiveSmallIntegerField(default=1, verbose_name='Critical hit bonus, %',
                                                           validators=[MaxValueValidator(100)])
     ammo = models.PositiveIntegerField(default=10)
-    radius = models.PositiveSmallIntegerField(default=0)
-    ricochet_chance = models.PositiveSmallIntegerField(default=1,
+    radius = models.PositiveSmallIntegerField(default=1)
+    ricochet_chance = models.PositiveSmallIntegerField(default=10,
                                                        verbose_name='Ricochet chance, %',
                                                        validators=[MaxValueValidator(100)])
     tank = models.ForeignKey('Tank', on_delete=models.CASCADE, related_name='projectiles', null=True, blank=True)
-    fire_price = models.PositiveIntegerField(default=1)
+    fire_price = models.PositiveIntegerField(default=2)
 
     def __str__(self):
         return f'{self.type.name} {self.pk}'
