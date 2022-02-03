@@ -36,11 +36,14 @@ ENV BUILD_ENV ${BUILD_ENVIRONMENT}
 WORKDIR ${APP_HOME}
 
 # Install required system dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update && apt-get install --no-install-recommends -y curl \
   # psycopg2 dependencies
   libpq-dev \
   # Translations dependencies
   gettext \
+  # NodeJS
+  && curl -sL https://deb.nodesource.com/setup_17.x | bash \
+  && apt-get install -y nodejs \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
@@ -78,5 +81,6 @@ RUN chmod +x /start-flower
 
 # copy application code to WORKDIR
 COPY . ${APP_HOME}
+RUN npm i
 
 ENTRYPOINT ["/entrypoint"]
