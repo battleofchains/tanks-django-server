@@ -17,6 +17,10 @@ def upload_tank_path(instance, filename):
     return f'tanks/{instance.pk}/{filename}'
 
 
+def upload_tank_type_path(instance, filename):
+    return f'tank_types/{instance.pk}/{filename}'
+
+
 class Map(models.Model):
     name = models.CharField(unique=True, max_length=255)
     json_file = models.FileField(verbose_name='JSON spec', upload_to=upload_maps_path)
@@ -71,6 +75,7 @@ class TankType(models.Model):
     armor_default = models.PositiveSmallIntegerField(default=100)
     rebound_chance_default = models.PositiveSmallIntegerField(default=1, verbose_name='Rebound chance default, %',
                                                               validators=[MaxValueValidator(100)])
+    image = models.ImageField(upload_to=upload_tank_type_path, null=True, blank=True)
 
     def __str__(self):
         return self.name
