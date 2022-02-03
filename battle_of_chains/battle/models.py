@@ -83,6 +83,7 @@ class TankType(models.Model):
 
 class Tank(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     type = models.ForeignKey(TankType, on_delete=models.PROTECT, related_name='tanks')
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name='tanks', null=True, blank=True)
