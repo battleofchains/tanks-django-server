@@ -12,10 +12,10 @@ build:
 build-no-cache:
 	$(COMPOSE) build --no-cache
 
-up: migrate load_fixtures
+up: load_fixtures npm-build
 	$(COMPOSE) up
 
-up[daemon]:
+up[daemon]: npm-build
 	$(COMPOSE) up -d
 
 stop:
@@ -50,3 +50,6 @@ django-logs:
 
 celery-logs:
 	$(COMPOSE) logs --tail 100 celeryworker
+
+npm-build:
+	$(DJANGO) npm run build

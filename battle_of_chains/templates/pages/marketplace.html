@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block javascript %}
-  <script src="{% static 'sockpuppet/sockpuppet.js' %}"></script>
+  <script src="{% static 'dist/js/reflex.js' %}"></script>
   <script src="{% static 'js/web3.min.js' %}"></script>
   <script src="{% static 'js/project.js' %}"></script>
 {% endblock %}
@@ -28,10 +28,10 @@
   </nav>
 {% endblock %}
 {% block content %}
-  <div class="row justify-content-between" data-reflex-root=".reflex-wrapper">
+  <div class="row justify-content-between" data-reflex-root=".reflex-wrapper" data-controller="controller">
     <div class="col-2 filters">
       <div class="reflex-filters-wrapper">
-        <div data-id="reset" class="reset-button" data-reflex="click->MarketReflex#clear_filters">Reset</div>
+        <div data-id="reset" class="reset-button" data-action="click->controller#clear_filters">Reset</div>
         <div>Filter</div>
         <hr>
         <p>Тип танка</p>
@@ -39,7 +39,7 @@
           {% for id, name in type_filter %}
             <label>{{ name }}
               <input type="checkbox" name="{{ name }}" value="{{ id }}"
-                     data-reflex="change->MarketReflex#filter"
+                     data-action="change->controller#filter"
                      data-filter="type__in">
             </label>
           {% endfor %}
@@ -49,7 +49,7 @@
         <p>{{ filter_name }}</p>
         <div class="range-wrap">
           <input type="range" min="0" max="{{ max_value }}" step="1" value="0" class="range"
-               data-reflex="change->MarketReflex#filter"
+               data-action="change->controller#filter"
                data-filter="{{ filter_name }}">
           <output class="bubble"></output>
           <div class="range-vals"><span>0</span><span>{{ max_value }}</span></div>
@@ -67,7 +67,7 @@
           </div>
           <div>
             <span class="small-text">Sort by</span>
-            <select data-reflex="change->MarketReflex#sort">
+            <select data-action="change->controller#sort">
             {% for val, name in orders.items %}
               <option value="{{ val }}" {% if order_by == val %}selected{% endif %}>{{ name }}</option>
             {% endfor %}
@@ -110,7 +110,7 @@
         <ul class="pagination">
           {% for page in paginator %}
             <li class="page-item {% if page.number == tanks.number %}active{% endif %}">
-              <button class="page-link" data-reflex="click->MarketReflex#page" data-page="{{ page.number }}">{{ page.number }}</button>
+              <button class="page-link" data-action="click->controller#page" data-page="{{ page.number }}">{{ page.number }}</button>
             </li>
           {% endfor %}
         </ul>

@@ -1,0 +1,29 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Battle of Chains ================",
+  "main": "index.js",
+  "dependencies": {
+    "web3": "^1.6.1"
+  },
+  "devDependencies": {
+    "glob": "^7.2.0",
+    "sockpuppet-js": "^0.6.0",
+    "stimulus": "^3.0.1",
+    "stimulus_reflex": "^3.4.1",
+    "webpack": "^5.67.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "watch": "webpack --watch --info-verbosity verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@git.ubex.io:7999/tank/tanks-django-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
