@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static truncate_trailing_zeroes %}
 {% block javascript %}
   <script src="{% static 'js/web3.min.js' %}"></script>
   <script src="{% static 'js/project.js' %}"></script>
@@ -9,7 +9,7 @@
   <div class="row justify-content-center">
     <div style="margin-bottom: 30px;"><a href="{% url 'market:marketplace' %}"><- Back</a></div>
     <div class="col-4">
-      <img src="{% if tank.image %}{{ tank.image.url }}{% endif %}" alt="tank-image" class="tank-image">
+      <img src="{% if tank.image %}{{ tank.image.url }}{% endif %}" alt="tank-image" class="tank-image card-wrap">
       <p>О танке</p>
       <p class="tank-desc">{{ tank.description }}</p>
     </div>
@@ -20,13 +20,36 @@
           <span class="tank-type">{{ tank.type }}</span>
         </div>
       </div>
-      <div class="tank-name row">
+      <div class="tank-name-detail row">
         <div class="col">
           {{ tank.name }}
           <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
         </div>
       </div>
+      <div class="row card-wrap info-wrap">
+        <div class="info-text">Стоимость</div>
+        <div class="tank-price-detail">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
+        <button class="buy-now"
+          {% if request.user.is_authenticated %}
+             onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
+          {% else %}
+             onclick="window.location.href='/accounts/login/?next=/marketplace/{{ tank.id }}/'"
+          {% endif %}>Buy Now</button>
+      </div>
+      <div class="row card-wrap info-wrap">
+        <div class="info-text">About</div>
+        {% for name, val in props.items %}
+          <div class="col-6">
+            <p class="prop-name">{{ name }}</p>
+            <p class="prop-val">{{ val }}</p>
+          </div>
+        {% endfor %}
+      </div>
     </div>
+  </div>
+  <hr>
+  <div class="row">
+
   </div>
 {% endblock %}
 

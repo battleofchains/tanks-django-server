@@ -12,7 +12,7 @@ build:
 build-no-cache:
 	$(COMPOSE) build --no-cache
 
-up: load_fixtures npm-build
+up: migrate load_fixtures npm-build
 	$(COMPOSE) up
 
 up[daemon]: npm-build

@@ -80,11 +80,12 @@
 }
 a {
   color: white;
+  text-decoration: none;
 }
 a:hover {
   color: white;
 }
-.card-bottom, .filters {
+.card-wrap, .filters {
   background-color: #24262C;
 }
 .card-bottom, .card-top {
@@ -151,4 +152,37 @@ a:hover {
 }
 .tank-desc {
   font-size: 14px;
+}
+.tank-name-detail {
+  font-size: 36px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.tank-price-detail {
+  font-size: 36px;
+  color: #FE7524;
+  margin-bottom: 20px;
+}
+.buy-now {
+  background: #FE7524;
+  border-radius: 10px;
+  width: 220px;
+  height: 40px;
+  color: white;
+}
+.info-wrap {
+  padding: 20px;
+}
+.info-text {
+  border-bottom: 1px solid white;
+  margin-bottom: 20px;
+}
+.prop-name {
+  color: #777E91;
+  font-size: 12px;
+}
+.prop-val {
+  color: #E6E8EC;
+  font-weight: bold;
+  font-size: 24px;
 }

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static truncate_trailing_zeroes %}
 {% block javascript %}
   <script src="{% static 'dist/js/reflex.js' %}"></script>
   <script src="{% static 'js/web3.min.js' %}"></script>
@@ -78,7 +78,7 @@
                        onclick="window.location.href='/accounts/login/?next=/marketplace/'"
                     {% endif %}
                   >
-                  <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %} BNB</div>
+                  <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
                 </div>
               </div>
             </div>
