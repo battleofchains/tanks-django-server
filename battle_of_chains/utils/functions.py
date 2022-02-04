@@ -40,6 +40,6 @@ def create_tank_from_offer(offer: Offer) -> Tank:
     return tank
 
 
-def truncate_trailing_zeroes(value, round_to=18):
+def truncate_trailing_zeroes(value, round_to=6):
     precision = f'%.{round_to}f' if round_to else f'%.18f'
     return (precision % value).rstrip('0').rstrip('.')
