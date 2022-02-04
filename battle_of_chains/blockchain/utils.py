@@ -139,6 +139,7 @@ def process_event_data(event: str, data: dict):
                 logger.error(f"Contract with address {data['address']} does not exist")
             else:
                 tank.price = Web3.fromWei(price, 'ether')
+                tank.for_sale = True
                 tank.save()
                 try:
                     NFT.objects.get(tank=tank)
