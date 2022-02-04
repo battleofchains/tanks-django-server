@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block javascript %}
+  <script src="{% static 'js/web3.min.js' %}"></script>
+  <script src="{% static 'js/project.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div style="margin-bottom: 30px;"><a href="{% url 'market:marketplace' %}"><- Back</a></div>
+    <div class="col-4">
+      <img src="{% if tank.image %}{{ tank.image.url }}{% endif %}" alt="tank-image" class="tank-image">
+      <p>О танке</p>
+      <p class="tank-desc">{{ tank.description }}</p>
+    </div>
+    <div class="col-4">
+      <div class="row">
+        <div class="col">
+          <span class="tank-id"># {{ tank.id }}</span>
+          <span class="tank-type">{{ tank.type }}</span>
+        </div>
+      </div>
+      <div class="tank-name row">
+        <div class="col">
+          {{ tank.name }}
+          <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block inline_javascript %}
+  <script>
+    {% if request.user.is_authenticated %}
+      set_account().then(result => {
+        console.log(result);
+        if (window.ethereum.networkVersion !== '97') {
+          alert('Please select BSC test network in MetaMask');
+        }
+      }).catch(err => {console.log(err)});
+    {% endif %}
+  </script>
+{% endblock inline_javascript %}

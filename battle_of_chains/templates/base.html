@@ -36,34 +36,22 @@
 
     <div class="mb-1">
     {% block navbar %}
-      <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <div class="container-fluid">
-          <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <a class="navbar-brand" href="{% url 'front:index' %}">Battle of Chains</a>
-
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="{% url 'front:index' %}">Home <span class="visually-hidden">(current)</span></a>
-              </li>
-              {% if request.user.is_authenticated %}
-                <li class="nav-item">
-                  {# URL provided by django-allauth/account/urls.py #}
-                  <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-                </li>
-              {% else %}
-                <li class="nav-item">
-                  {# URL provided by django-allauth/account/urls.py #}
-                  <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-                </li>
-                <li class="nav-item">
-                  {# URL provided by django-allauth/account/urls.py #}
-                  <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-                </li>
-              {% endif %}
-            </ul>
+      <nav class="navbar nav-marketplace">
+        <div class="container">
+          <img src="{% static 'images/Logo.png' %}" alt="logo">
+          <div class="menu row">
+            <div class="col">Dashboard</div>
+            <div class="col">Marketplace</div>
+            <div class="col">Staking</div>
+            <div class="col">Help&nbspCenter</div>
+            <div class="col">Download</div>
+          </div>
+          <div class="login">
+            {% if request.user.is_authenticated %}
+              <a href="/accounts/logout/?next=/marketplace/">Log Out</a>
+            {% else %}
+              <a href="/accounts/login/?next=/marketplace/">Log In</a>
+            {% endif %}
           </div>
         </div>
       </nav>

@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 from django.db.models import Max, Q
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, TemplateView
 
 from battle_of_chains.battle.models import BattleSettings, Tank, TankType
 
@@ -23,4 +23,17 @@ class MarketPlaceView(TemplateView):
         maxes = [Max(prop) for prop in ('level', 'moving_price', 'overlook', 'armor', 'hp')]
         range_filters = Tank.objects.aggregate(*maxes)
         context['range_filters'] = {k.split('__')[0]: v for k, v in range_filters.items()}
+        return context
+
+
+class MarketPlaceDetailView(DetailView):
+    queryset = Tank.objects.filter(
+        Q(for_sale=True, basic_free_tank=False) | Q(basic_free_tank=True, offer__is_active=True)
+    )
+    template_name = 'pages/marketplace_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tank'] = context['object']
+        context['similar_tanks'] = self.queryset.filter(type=self.object.type, level=self.object.level)
         return context

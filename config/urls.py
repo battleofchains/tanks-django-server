@@ -9,7 +9,7 @@ admin.site.site_header = 'Battle of Chains'
 
 urlpatterns = [
     path("", include("battle_of_chains.front.urls", namespace="front")),
-    path("", include("battle_of_chains.market.urls", namespace="market")),
+    path("marketplace/", include("battle_of_chains.market.urls", namespace="market")),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("battle_of_chains.users.urls", namespace="users")),

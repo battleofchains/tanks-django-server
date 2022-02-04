@@ -6,27 +6,6 @@
   <script src="{% static 'js/project.js' %}"></script>
 {% endblock %}
 
-{% block navbar %}
-  <nav class="navbar nav-marketplace">
-    <div class="container">
-      <img src="{% static 'images/Logo.png' %}" alt="logo">
-      <div class="menu row">
-        <div class="col">Dashboard</div>
-        <div class="col">Marketplace</div>
-        <div class="col">Staking</div>
-        <div class="col">Help&nbspCenter</div>
-        <div class="col">Download</div>
-      </div>
-      <div class="login">
-        {% if request.user.is_authenticated %}
-          <a href="/accounts/logout/?next=/marketplace/">Log Out</a>
-        {% else %}
-          <a href="/accounts/login/?next=/marketplace/">Log In</a>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
-{% endblock %}
 {% block content %}
   <div class="row justify-content-between" data-reflex-root=".reflex-wrapper" data-controller="controller">
     <div class="col-2 filters">
@@ -79,13 +58,13 @@
         {% for tank in tanks %}
           <div class="col">
             <div class="card-wrap">
-              <div class="card-top" style="background-image: url('{% if tank.image %}{{ tank.image.url }}{% endif %}');">
+              <a href="{% url 'market:marketplace-detail' tank.id %}" class="card-top" style="background-image: url('{% if tank.image %}{{ tank.image.url }}{% endif %}');">
                 <div>
                   <span class="tank-id"># {{ tank.id }}</span>
                   <span class="tank-type">{{ tank.type }}</span>
                   <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
                 </div>
-              </div>
+              </a>
               <div class="card-bottom">
                 <div class="card-bottom-1">
                   <div class="tank-name">{{ tank.name }}</div>
