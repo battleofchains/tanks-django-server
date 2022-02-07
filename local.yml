@@ -28,6 +28,7 @@ services:
     ports:
       - "8000:8000"
     command: /start
+    restart: unless-stopped
     logging:
       driver: "json-file"
       options:
@@ -52,6 +53,7 @@ services:
       options:
         max-size: "100m"
         max-file: "1"
+    restart: unless-stopped
 
   redis:
     image: redis:6
@@ -63,6 +65,7 @@ services:
       options:
         max-size: "100m"
         max-file: "1"
+    restart: unless-stopped
 
   elasticsearch:
     build:
@@ -84,6 +87,7 @@ services:
       options:
         max-size: "200m"
         max-file: "2"
+    restart: unless-stopped
 
   logstash:
     build:
@@ -109,6 +113,7 @@ services:
       options:
         max-size: "500m"
         max-file: "2"
+    restart: unless-stopped
 
   kibana:
     build:
@@ -130,6 +135,7 @@ services:
       options:
         max-size: "100m"
         max-file: "1"
+    restart: unless-stopped
 
   celeryworker:
     <<: *django
