@@ -45,8 +45,8 @@
             <div class="small-text">{{ paginator.count }} results</div>
           </div>
           <div>
-            <span class="small-text">Sort by</span>
-            <select data-action="change->controller#sort">
+            <label for="sort" class="small-text">Sort by</label>
+            <select id="sort" data-action="change->controller#sort">
             {% for val, name in orders.items %}
               <option value="{{ val }}" {% if order_by == val %}selected{% endif %}>{{ name }}</option>
             {% endfor %}
@@ -78,7 +78,10 @@
                        onclick="window.location.href='/accounts/login/?next=/marketplace/'"
                     {% endif %}
                   >
-                  <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
+                  <div class="tank-price">
+                    <img src="{% static 'images/price-icon.png' %}" style="margin-right: 8px;" alt="">
+                    {% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB
+                  </div>
                 </div>
               </div>
             </div>

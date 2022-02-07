@@ -30,7 +30,10 @@
           </div>
           <div class="row card-wrap info-wrap">
             <div class="info-text">Стоимость</div>
-            <div class="tank-price-detail">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
+            <div class="tank-price-detail">
+              <img src="{% static 'images/price-icon-big.png' %}" style="margin-right: 8px;" alt="">
+              {% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB
+            </div>
             <button class="buy-now"
               {% if request.user.is_authenticated %}
                  onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
@@ -75,7 +78,10 @@
                        onclick="window.location.href='/accounts/login/?next=/marketplace/{{ tank.id }}/'"
                     {% endif %}
                   >
-                  <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
+                  <div class="tank-price">
+                    <img src="{% static 'images/price-icon.png' %}" style="margin-right: 8px;" alt="">
+                    {% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB
+                  </div>
                 </div>
               </div>
             </div>
