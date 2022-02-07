@@ -7,50 +7,84 @@
 
 {% block content %}
   <div class="row justify-content-center">
-    <div style="margin-bottom: 30px;"><a href="{% url 'market:marketplace' %}"><- Back</a></div>
-    <div class="col-4">
-      <img src="{% if tank.image %}{{ tank.image.url }}{% endif %}" alt="tank-image" class="tank-image card-wrap">
-      <p>О танке</p>
-      <p class="tank-desc">{{ tank.description }}</p>
-    </div>
-    <div class="col-4">
+    <div class="col-8">
       <div class="row">
-        <div class="col">
-          <span class="tank-id"># {{ tank.id }}</span>
-          <span class="tank-type">{{ tank.type }}</span>
+        <div style="margin-bottom: 30px;"><a href="{% url 'market:marketplace' %}"><- Back</a></div>
+        <div class="col-6">
+          <img src="{% if tank.image %}{{ tank.image.url }}{% endif %}" alt="tank-image" class="tank-image card-wrap">
+          <p>О танке</p>
+          <p class="tank-desc">{{ tank.description }}</p>
+        </div>
+        <div class="col-6">
+          <div class="row">
+            <div class="col">
+              <span class="tank-id"># {{ tank.id }}</span>
+              <span class="tank-type">{{ tank.type }}</span>
+            </div>
+          </div>
+          <div class="tank-name-detail row">
+            <div class="col">
+              {{ tank.name }}
+              <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
+            </div>
+          </div>
+          <div class="row card-wrap info-wrap">
+            <div class="info-text">Стоимость</div>
+            <div class="tank-price-detail">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
+            <button class="buy-now"
+              {% if request.user.is_authenticated %}
+                 onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
+              {% else %}
+                 onclick="window.location.href='/accounts/login/?next=/marketplace/{{ tank.id }}/'"
+              {% endif %}>Buy Now</button>
+          </div>
+          <div class="row card-wrap info-wrap">
+            <div class="info-text">About</div>
+            {% for name, val in props.items %}
+              <div class="col-6">
+                <p class="prop-name">{{ name }}</p>
+                <p class="prop-val">{{ val }}</p>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
-      <div class="tank-name-detail row">
-        <div class="col">
-          {{ tank.name }}
-          <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
-        </div>
-      </div>
-      <div class="row card-wrap info-wrap">
-        <div class="info-text">Стоимость</div>
-        <div class="tank-price-detail">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
-        <button class="buy-now"
-          {% if request.user.is_authenticated %}
-             onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
-          {% else %}
-             onclick="window.location.href='/accounts/login/?next=/marketplace/{{ tank.id }}/'"
-          {% endif %}>Buy Now</button>
-      </div>
-      <div class="row card-wrap info-wrap">
-        <div class="info-text">About</div>
-        {% for name, val in props.items %}
-          <div class="col-6">
-            <p class="prop-name">{{ name }}</p>
-            <p class="prop-val">{{ val }}</p>
+      <hr>
+      <p>Похожие танки</p>
+      <div class="row">
+        {% for tank in similar_tanks %}
+          <div class="col-3">
+            <div class="card-wrap">
+              <a href="{% url 'market:marketplace-detail' tank.id %}" class="card-top" style="background-image: url('{% if tank.image %}{{ tank.image.url }}{% endif %}');">
+                <div>
+                  <span class="tank-id"># {{ tank.id }}</span>
+                  <span class="tank-type">{{ tank.type }}</span>
+                  <span class="tank-supply">{% if tank.offer %}{{ tank.offer.amount_sold }} / {{ tank.offer.amount }}{% else %}1 / 1{% endif %}</span>
+                </div>
+              </a>
+              <div class="card-bottom">
+                <div class="card-bottom-1">
+                  <div class="tank-name">{{ tank.name }}</div>
+                  <div class="small-text">{{ tank.type }}</div>
+                </div>
+                <div class="card-bottom-2">
+                  <img src="{% static 'images/cart-btn.png' %}" alt="cart"
+                    {% if request.user.is_authenticated %}
+                       onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
+                    {% else %}
+                       onclick="window.location.href='/accounts/login/?next=/marketplace/{{ tank.id }}/'"
+                    {% endif %}
+                  >
+                  <div class="tank-price">{% if tank.has_offer %}{{ tank.offer.price|truncate_trailing_zeroes }}{% else %}{{ tank.price|truncate_trailing_zeroes }}{% endif %} BNB</div>
+                </div>
+              </div>
+            </div>
           </div>
         {% endfor %}
       </div>
     </div>
   </div>
-  <hr>
-  <div class="row">
 
-  </div>
 {% endblock %}
 
 {% block inline_javascript %}

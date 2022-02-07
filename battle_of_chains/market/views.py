@@ -36,7 +36,7 @@ class MarketPlaceDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         tank = self.object
         context['tank'] = tank
-        context['similar_tanks'] = self.queryset.filter(type=tank.type, level=tank.level)
+        context['similar_tanks'] = self.queryset.filter(type=tank.type, level=tank.level).exclude(pk=tank.pk)[:4]
         props = ('level', 'moving_price', 'overlook', 'hp', 'armor')
         context['props'] = {k: v for k, v in tank.__dict__.items() if k in props}
         return context
