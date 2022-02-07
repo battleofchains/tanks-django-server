@@ -82,6 +82,9 @@ a {
   color: white;
   text-decoration: none;
 }
+a.orange {
+  color: #FE7524;
+}
 a:hover {
   color: white;
 }

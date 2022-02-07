@@ -53,7 +53,7 @@
         </div>
       </div>
       <hr>
-      <p>Похожие танки</p>
+      {% if similar_tanks %}<p>Похожие танки</p>{% endif %}
       <div class="row">
         {% for tank in similar_tanks %}
           <div class="col-3">
