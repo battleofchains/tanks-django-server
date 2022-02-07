@@ -7,5 +7,5 @@ app_name = 'front'
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
-    path('game/', login_required(GameView.as_view()), name='game'),
+    path('game/', GameView.as_view(), name='game'),
 ]

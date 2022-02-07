@@ -1,4 +1,3 @@
-import json
 import logging
 from urllib.parse import urljoin
 
@@ -63,17 +62,16 @@ def deploy_smart_contract(contract: Contract):
         logger.debug(f'Contract already deployed at {contract.address}')
 
 
-def mint_nft(tank: Tank, mainnet=False):
+def mint_nft(tank: Tank):
     if NFT.objects.filter(tank=tank).exists():
         raise MintException(f'NFT for tank {tank.id} already minted')
     if not tank.owner or not tank.owner.wallet:
         raise MintException(f'Tank {tank.id} owner has no associated wallet to mint to')
-    if mainnet:
-        network_code = 'bsc-main'
-    else:
-        network_code = 'bsc-test'
+    network = BattleSettings.get_solo().active_network
+    if not network:
+        raise MintException('Network not set in Global Settings')
     contract = Contract.objects.get(
-        network__code=network_code, is_active=True, symbol=BattleSettings.get_solo().nft_ticker
+        network=network, is_active=True, symbol=BattleSettings.get_solo().nft_ticker
     )
     w3 = get_w3_provider(contract)
     owner = settings.CONTRACTS_OWNER
@@ -141,6 +139,7 @@ def process_event_data(event: str, data: dict):
                 logger.error(f"Contract with address {data['address']} does not exist")
             else:
                 tank.price = Web3.fromWei(price, 'ether')
+                tank.for_sale = True
                 tank.save()
                 try:
                     NFT.objects.get(tank=tank)
