@@ -356,3 +356,7 @@ CACHES = {
         },
     }
 }
+
+ACCOUNT_FORMS = {
+    'signup': 'battle_of_chains.users.forms.UserRegisterForm'
+}

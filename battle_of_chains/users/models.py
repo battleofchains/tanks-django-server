@@ -45,6 +45,7 @@ class User(AbstractUser):
 
     email = models.EmailField(_('email address'), unique=True)
     wallet = models.OneToOneField(Wallet, on_delete=models.SET_NULL, blank=True, null=True, related_name='user')
+    notifications_disabled = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

@@ -5,28 +5,22 @@
 
 {% block head_title %}{% translate "Signup" %}{% endblock %}
 
-{% block content %}
-  <div class="row">
-    <div class="col-6">
-      <img src="{% static 'images/register-image.png' %}">
-    </div>
-    <div class="col-6" style="background: #24262C;">
-      <div><a href="{% url 'market:marketplace' %}"><- Back</a></div>
+{% block inner %}
+  <h1>{% translate "Create new account" %}</h1>
 
-      <h1>{% translate "Create new account" %}</h1>
+  <p style="margin-bottom: 35px;">{% blocktranslate %}Easily track accounts, transactions, and more{% endblocktranslate %}</p>
 
-      <p>{% blocktranslate %}Easily track accounts, transactions, and more{% endblocktranslate %}</p>
+  <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+    {% csrf_token %}
+    {{ form|crispy }}
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+    <p style="font-size: 14px; margin-bottom: 2rem;">By registering, you agree with our <a href="#" class="orange">Terms of Use</a> and <a href="#" class="orange">Privacy Policy</a></p>
 
-      <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-        {% csrf_token %}
-        {{ form|crispy }}
-        {% if redirect_field_value %}
-        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-        {% endif %}
-        <button class="btn btn-primary" type="submit">{% translate "Register" %} &raquo;</button>
-      </form>
-      <p>{% blocktranslate %}Already registered? <a href="{{ login_url }}">Sign in</a>{% endblocktranslate %}</p>
-    </div>
-  </div>
-
+    <button class="buy-now" type="submit" style="float: right">{% translate "Register" %}</button>
+    <p style="color: #777E91; margin: 0; padding-top: 8px;">
+      {% blocktranslate %}Already registered? <a href="{{ login_url }}" class="orange">Sign in</a>{% endblocktranslate %}
+    </p>
+  </form>
 {% endblock %}
