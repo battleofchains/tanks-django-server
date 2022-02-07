@@ -50,6 +50,11 @@ class HasOwnerFilter(SimpleListFilter):
 class MapAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'is_active')
 
+    #  https://stackoverflow.com/questions/57661025/how-to-prevent-deletion-of-django-model-from-django-admin-unless-part-of-a-casc
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        return deleted_objects, model_count, set(), protected
+
 
 @admin.register(BattleType)
 class BattleTypeAdmin(admin.ModelAdmin):

@@ -52,7 +52,7 @@ class Battle(models.Model):
             (FINISHED, FINISHED),
         )
 
-    map = models.ForeignKey(Map, on_delete=models.PROTECT, related_name='battles')
+    map = models.ForeignKey(Map, on_delete=models.CASCADE, related_name='battles')
     created = models.DateTimeField(auto_now_add=True)
     duration = models.PositiveIntegerField(default=0, verbose_name='Duration, seconds')
     status = models.CharField(choices=STATUS.CHOICES, max_length=10, default=STATUS.WAITING)
