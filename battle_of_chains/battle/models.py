@@ -25,6 +25,7 @@ class Map(models.Model):
     name = models.CharField(unique=True, max_length=255)
     json_file = models.FileField(verbose_name='JSON spec', upload_to=upload_maps_path)
     sprite_file = models.FileField(verbose_name='Sprites', upload_to=upload_maps_path)
+    background_file = models.FileField(verbose_name='Background', upload_to=upload_maps_path, null=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
