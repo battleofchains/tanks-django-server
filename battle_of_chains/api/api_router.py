@@ -4,14 +4,8 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
 from battle_of_chains.api.views import (
-    ProjectileViewSet,
-    TankViewSet,
-    UserViewSet,
-    ContractViewSet,
-    TankNftMetaViewSet,
-    WalletViewSet,
-    TankNewTokenIdViewSet,
-)
+    ContractViewSet, GlobalSettingsView, ProjectileViewSet, TankNewTokenIdViewSet, TankNftMetaViewSet, TankViewSet,
+    UserViewSet, WalletViewSet,)
 
 if settings.DEBUG:
     router = DefaultRouter()
@@ -29,4 +23,7 @@ router.register("new_token_id", TankNewTokenIdViewSet, basename='new_token_id')
 
 app_name = "api"
 urlpatterns = router.urls
-urlpatterns += [path("auth-token/", obtain_auth_token, name='auth-token')]
+urlpatterns += [
+    path("auth-token/", obtain_auth_token, name='auth-token'),
+    path('settings/', GlobalSettingsView.as_view(), name='settings')
+]

@@ -1,23 +1,15 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import (
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-)
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from battle_of_chains.battle.models import Projectile, Tank
+from battle_of_chains.battle.models import BattleSettings, Projectile, Tank
 from battle_of_chains.battle.serializers import (
-    ProjectileSerializer,
-    TankNftMetaSerializer,
-    TankSerializer,
-    TankNewTokenIdSerializer,
-)
+    GlobalSettingsSerializer, ProjectileSerializer, TankNewTokenIdSerializer, TankNftMetaSerializer, TankSerializer,)
 from battle_of_chains.blockchain.models import Contract, Wallet
 from battle_of_chains.blockchain.serializers import ContractSerializer, WalletSerializer
 from battle_of_chains.users.serializers import UserSerializer
@@ -110,3 +102,10 @@ class WalletViewSet(RetrieveModelMixin, ListModelMixin, CreateModelMixin, Update
 class TankNewTokenIdViewSet(RetrieveModelMixin, GenericViewSet):
     serializer_class = TankNewTokenIdSerializer
     queryset = Tank.objects.all()
+
+
+class GlobalSettingsView(RetrieveAPIView):
+    serializer_class = GlobalSettingsSerializer
+
+    def get_object(self):
+        return BattleSettings.get_solo()

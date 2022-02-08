@@ -129,3 +129,9 @@ class TankNewTokenIdSerializer(serializers.ModelSerializer):
             return obj.id
         else:
             raise TankTokenException()
+
+
+class GlobalSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BattleSettings
+        fields = '__all__'
