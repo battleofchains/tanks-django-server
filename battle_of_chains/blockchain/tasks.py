@@ -5,7 +5,7 @@ from django.core.cache import cache
 
 from battle_of_chains.battle.models import Tank
 from battle_of_chains.blockchain.models import Contract
-from battle_of_chains.blockchain.utils import deploy_smart_contract, mint_nft, read_contract_events
+from battle_of_chains.blockchain.utils import SmartContract, mint_nft
 from config.celery_app import app
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,8 @@ def deploy_smart_contract_task(self, contract_id):
 
     try:
         contract = Contract.objects.get(id=contract_id)
-        deploy_smart_contract(contract)
+        smart_contract = SmartContract(contract)
+        smart_contract.deploy()
     except Exception as e:
         logger.error(f'Cannot deploy contract {contract_id}. Error: {e}')
     finally:
@@ -47,4 +48,5 @@ def mint_nft_task(self, tank_id):
 @app.task()
 def read_events():
     for contract in Contract.objects.filter(is_active=True):
-        read_contract_events(contract)
+        smart_contract = SmartContract(contract)
+        smart_contract.read_events()

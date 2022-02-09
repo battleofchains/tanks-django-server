@@ -14,6 +14,8 @@ from battle_of_chains.blockchain.models import NFT, BlockchainEvent, Contract, W
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+EVENTS = ('Minted', 'Purchase', 'PriceUpdate', 'NftListStatus')
+
 
 class MintException(Exception):
     pass
@@ -30,38 +32,6 @@ def send_transaction(w3, txn, owner_address, owner_secret):
     return tx_receipt
 
 
-def get_w3_provider(contract: Contract) -> Web3:
-    w3 = Web3(Web3.HTTPProvider(contract.network.rpc_url, request_kwargs={'timeout': 60}))
-    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    owner = settings.CONTRACTS_OWNER
-    w3.eth.defaultAccount = owner['address']
-    return w3
-
-
-def deploy_smart_contract(contract: Contract):
-    w3 = get_w3_provider(contract)
-    owner = settings.CONTRACTS_OWNER
-    if not contract.address:
-        logger.debug(f'Deploy...')
-        smart_contract = w3.eth.contract(
-            abi=contract.contract_definitions['abi'], bytecode=contract.contract_definitions['bytecode']
-        )
-        txn = smart_contract.constructor(contract.name, contract.symbol)
-        try:
-            tx_receipt = send_transaction(w3, txn, owner['address'], owner['secret'])
-        except Exception as e:
-            logger.exception(e)
-        else:
-            contract_address = tx_receipt['contractAddress']
-            contract.address = contract_address
-            contract.is_active = True
-            contract.save()
-            logger.info(f'Contract is deployed at {contract_address}')
-            logger.info(tx_receipt)
-    else:
-        logger.debug(f'Contract already deployed at {contract.address}')
-
-
 def mint_nft(tank: Tank):
     if NFT.objects.filter(tank=tank).exists():
         raise MintException(f'NFT for tank {tank.id} already minted')
@@ -73,21 +43,8 @@ def mint_nft(tank: Tank):
     contract = Contract.objects.get(
         network=network, is_active=True, symbol=BattleSettings.get_solo().nft_ticker
     )
-    w3 = get_w3_provider(contract)
-    owner = settings.CONTRACTS_OWNER
-    smart_contract = w3.eth.contract(
-        abi=contract.contract_definitions['abi'], address=w3.toChecksumAddress(contract.address)
-    )
-    address_to = w3.toChecksumAddress(tank.owner.wallet.address)
-    price = w3.toWei(tank.price, 'ether')
-    meta_url = reverse('api:nft_meta-detail', args=[tank.id])
-    meta_url = urljoin(settings.SITE_URL, meta_url)
-    txn = smart_contract.functions.mint(tank.id, meta_url, address_to, price)
-    tx_receipt = send_transaction(w3, txn, w3.toChecksumAddress(owner['address']), owner['secret'])
-    logger.info(tx_receipt)
-    if tx_receipt.get('transactionHash'):
-        tx_hash = tx_receipt['transactionHash'].hex()
-        NFT.objects.create(tank=tank, tx_hash=tx_hash, contract=contract, owner=tank.owner.wallet)
+    smart_contract = SmartContract(contract)
+    smart_contract.mint_nft(tank)
 
 
 def process_event_data(event: str, data: dict):
@@ -168,28 +125,89 @@ def process_event_data(event: str, data: dict):
                 tank.save()
 
 
-def read_contract_events(contract: Contract):
-    w3 = get_w3_provider(contract)
-    smart_contract = w3.eth.contract(
-        abi=contract.contract_definitions['abi'], address=w3.toChecksumAddress(contract.address)
-    )
-    for event in ('Minted', 'Purchase', 'PriceUpdate', 'NftListStatus'):
-        last_block = BlockchainEvent.objects.filter(contract=contract, event=event)\
-            .aggregate(last_block=Max('block_number'))['last_block'] or 0
-        last_block = max(last_block, w3.eth.get_block_number() - 4900)
-        event_filter = smart_contract.events.__getitem__(event).createFilter(fromBlock=last_block)
-        for entry in event_filter.get_all_entries():
-            logger.debug(entry)
-            args = entry['args']
-            be, created = BlockchainEvent.objects.get_or_create(
-                tx_hash=entry['transactionHash'].hex(),
-                event=event,
-                defaults={'contract': contract,
-                          'block_number': entry['blockNumber'],
-                          'args': w3.toJSON(args)}
+class SmartContract:
+
+    def __init__(self, contract):
+        self.contract = contract
+        self.w3 = self._get_w3_provider()
+        self.smart_contract = self.w3.eth.contract(
+            abi=contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(contract.address)
+        )
+        self.owner = settings.CONTRACTS_OWNER
+
+    def _get_w3_provider(self) -> Web3:
+        w3 = Web3(Web3.HTTPProvider(self.contract.network.rpc_url, request_kwargs={'timeout': 60}))
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        w3.eth.defaultAccount = self.owner['address']
+        return w3
+
+    def deploy(self):
+        if not self.contract.address:
+            logger.debug(f'Deploy...')
+            smart_contract = self.w3.eth.contract(
+                abi=self.contract.contract_definitions['abi'], bytecode=self.contract.contract_definitions['bytecode']
             )
-            if created:
-                ts = w3.eth.getBlock(entry['blockNumber'])['timestamp']
-                be.timestamp = ts
-                be.save()
-                process_event_data(event, entry)
+            txn = smart_contract.constructor(self.contract.name, self.contract.symbol)
+            try:
+                tx_receipt = send_transaction(self.w3, txn, self.owner['address'], self.owner['secret'])
+            except Exception as e:
+                logger.exception(e)
+            else:
+                contract_address = tx_receipt['contractAddress']
+                self.contract.address = contract_address
+                self.contract.is_active = True
+                self.contract.save()
+                logger.info(f'Contract is deployed at {contract_address}')
+                logger.info(tx_receipt)
+        else:
+            logger.debug(f'Contract already deployed at {self.contract.address}')
+
+    def mint_nft(self, tank):
+        address_to = self.w3.toChecksumAddress(tank.owner.wallet.address)
+        price = self.w3.toWei(tank.price, 'ether')
+        meta_url = reverse('api:nft_meta-detail', args=[tank.id])
+        meta_url = urljoin(settings.SITE_URL, meta_url)
+        txn = self.smart_contract.functions.mint(tank.id, meta_url, address_to, price)
+        tx_receipt = send_transaction(
+            self.w3, txn, self.w3.toChecksumAddress(self.owner['address']), self.owner['secret']
+        )
+        logger.info(tx_receipt)
+        if tx_receipt.get('transactionHash'):
+            tx_hash = tx_receipt['transactionHash'].hex()
+            NFT.objects.create(tank=tank, tx_hash=tx_hash, contract=self.contract, owner=tank.owner.wallet)
+
+    def read_events(self):
+        for event in EVENTS:
+            last_block = BlockchainEvent.objects.filter(contract=self.contract, event=event) \
+                             .aggregate(last_block=Max('block_number'))['last_block'] or 0
+            last_block = max(last_block, self.w3.eth.get_block_number() - 4900)
+            event_filter = self.smart_contract.events.__getitem__(event).createFilter(fromBlock=last_block)
+            for entry in event_filter.get_all_entries():
+                self.process_log_entry(entry, event)
+
+    def process_log_entry(self, entry, event):
+        logger.debug(entry)
+        args = entry['args']
+        be, created = BlockchainEvent.objects.get_or_create(
+            tx_hash=entry['transactionHash'].hex(),
+            event=event,
+            defaults={'contract': self.contract,
+                      'block_number': entry['blockNumber'],
+                      'args': self.w3.toJSON(args)}
+        )
+        if created:
+            ts = self.w3.eth.getBlock(entry['blockNumber'])['timestamp']
+            be.timestamp = ts
+            be.save()
+            process_event_data(event, entry)
+
+    def read_events_by_tx(self, tx_hash):
+        tx_receipt = self.w3.eth.get_transaction_receipt(tx_hash)
+        smart_contract = self.w3.eth.contract(
+            abi=self.contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(self.contract.address)
+        )
+        for event in EVENTS:
+            processed_logs = smart_contract.events.__getitem__(event)().processReceipt(tx_receipt)
+            assert len(processed_logs) == 1
+            entry = processed_logs[0]
+            self.process_log_entry(entry, event)
