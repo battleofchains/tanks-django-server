@@ -6,6 +6,46 @@ async function getAccount() {
   return accounts[0];
 }
 
+async function setNetwork() {
+    let xhr = new XMLHttpRequest();
+    let network;
+    xhr.open('GET', '/api/settings/', false);
+    xhr.send();
+    if (xhr.status !== 200) {
+      console.log( xhr.status + ': ' + xhr.statusText );
+    } else {
+      let data = JSON.parse(xhr.responseText);
+      network = data['active_network'];
+    }
+    try {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: network['chain_id'] }],
+      });
+    } catch (switchError) {
+      // This error code indicates that the chain has not been added to MetaMask.
+      if (switchError.code === 4902) {
+        try {
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: network['chain_id'],
+                chainName: network['name'],
+                rpcUrls: [network['rpc_url']],
+                blockExplorerUrls: [network['url_explorer']]
+              },
+            ],
+          });
+        } catch (addError) {
+          console.log(addError);
+        }
+      } else {
+          console.log(switchError);
+      }
+    }
+}
+
 function get_contract() {
     let xhr = new XMLHttpRequest();
     let abi;

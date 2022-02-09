@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from web3.auto import w3
 
-from .models import Contract, Wallet
+from .models import Contract, Wallet, Network
 
 User = get_user_model()
 
@@ -25,3 +25,9 @@ class WalletSerializer(serializers.ModelSerializer):
         if not address or not isinstance(address, str) or not w3.isAddress(address):
             raise serializers.ValidationError(f'Incorrect address ({address})')
         return address
+
+
+class NetworkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Network
+        fields = '__all__'

@@ -1,19 +1,39 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from battle_of_chains.battle.models import BattleSettings, Projectile, Tank
 from battle_of_chains.battle.serializers import (
-    GlobalSettingsSerializer, ProjectileSerializer, TankNewTokenIdSerializer, TankNftMetaSerializer, TankSerializer,)
+    GlobalSettingsSerializer,
+    ProjectileSerializer,
+    TankNewTokenIdSerializer,
+    TankNftMetaSerializer,
+    TankSerializer,
+)
 from battle_of_chains.blockchain.models import Contract, Wallet
 from battle_of_chains.blockchain.serializers import ContractSerializer, WalletSerializer
+from battle_of_chains.blockchain.utils import SmartContract
 from battle_of_chains.users.serializers import UserSerializer
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -109,3 +129,24 @@ class GlobalSettingsView(RetrieveAPIView):
 
     def get_object(self):
         return BattleSettings.get_solo()
+
+
+class ReadBlockchainView(APIView):
+
+    def post(self, request, format=None):
+        tx_hash = request.POST.get('transactionHash')
+        contract_address = request.POST.get('to')
+        if not tx_hash or not contract_address:
+            return Response({'error': 'invalid data received'}, status=HTTP_400_BAD_REQUEST)
+        try:
+            contract = Contract.objects.get(address=contract_address)
+        except Contract.DoesNotExist:
+            return Response({'error': f'Contract with address {contract_address} does not exist'},
+                            status=HTTP_400_BAD_REQUEST)
+        smart_contract = SmartContract(contract)
+        try:
+            smart_contract.read_events_by_tx(tx_hash)
+        except Exception as e:
+            logger.exception(f'Exception trying to read events from tx {tx_hash}: {e}')
+            return Response({'error': str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'success': True}, status=HTTP_200_OK)

@@ -314,6 +314,7 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_ADAPTER = "battle_of_chains.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "battle_of_chains.users.adapters.SocialAccountAdapter"
+ACCOUNT_LOGOUT_ON_GET = True
 
 # django-rest-framework
 # -------------------------------------------------------------------------------

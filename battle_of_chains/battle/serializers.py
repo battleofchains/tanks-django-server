@@ -6,9 +6,19 @@ from rest_framework import serializers
 from rest_framework.exceptions import APIException
 from rest_framework.status import HTTP_409_CONFLICT
 
+from battle_of_chains.blockchain.serializers import NetworkSerializer
 from battle_of_chains.utils.functions import create_tank_from_offer
 
-from .models import BattleSettings, BattleType, Country, Map, Projectile, ProjectileType, Tank, TankType
+from .models import (
+    BattleSettings,
+    BattleType,
+    Country,
+    Map,
+    Projectile,
+    ProjectileType,
+    Tank,
+    TankType,
+)
 
 
 class TankTokenException(APIException):
@@ -132,6 +142,8 @@ class TankNewTokenIdSerializer(serializers.ModelSerializer):
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
+    active_network = NetworkSerializer()
+
     class Meta:
         model = BattleSettings
         fields = '__all__'
