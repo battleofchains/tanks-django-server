@@ -128,12 +128,12 @@ def process_event_data(event: str, data: dict):
 class SmartContract:
 
     def __init__(self, contract):
+        self.owner = settings.CONTRACTS_OWNER
         self.contract = contract
         self.w3 = self._get_w3_provider()
         self.smart_contract = self.w3.eth.contract(
             abi=contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(contract.address)
         )
-        self.owner = settings.CONTRACTS_OWNER
 
     def _get_w3_provider(self) -> Web3:
         w3 = Web3(Web3.HTTPProvider(self.contract.network.rpc_url, request_kwargs={'timeout': 60}))

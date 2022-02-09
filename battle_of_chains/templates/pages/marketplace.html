@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static truncate_trailing_zeroes %}
+{% load static truncate_trailing_zeroes solo_tags %}
 {% block javascript %}
   <script src="{% static 'dist/js/reflex.js' %}"></script>
   <script src="{% static 'js/web3.min.js' %}"></script>
@@ -102,6 +102,7 @@
 {% endblock %}
 
 {% block inline_javascript %}
+  {% get_solo 'battle.BattleSettings' as global_settings %}
   <script>
     const allRanges = document.querySelectorAll(".range-wrap");
     allRanges.forEach(wrap => {
@@ -140,9 +141,11 @@
     {% if request.user.is_authenticated %}
       set_account().then(result => {
         console.log(result);
-        if (window.ethereum.networkVersion !== '97') {
-          alert('Please select BSC test network in MetaMask');
-        }
+        getChainId().then(result => {
+          if (result !== '{{ global_settings.active_network.chain_id }}') {
+            setNetwork().then(result => {console.log(result)});
+          }
+        });
       }).catch(err => {console.log(err)});
     {% endif %}
   </script>

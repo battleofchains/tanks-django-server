@@ -6,6 +6,10 @@ async function getAccount() {
   return accounts[0];
 }
 
+async function getChainId() {
+    return await ethereum.request({ method: 'eth_chainId' });
+}
+
 async function setNetwork() {
     let xhr = new XMLHttpRequest();
     let network;
@@ -13,6 +17,7 @@ async function setNetwork() {
     xhr.send();
     if (xhr.status !== 200) {
       console.log( xhr.status + ': ' + xhr.statusText );
+      return false;
     } else {
       let data = JSON.parse(xhr.responseText);
       network = data['active_network'];
@@ -22,6 +27,7 @@ async function setNetwork() {
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: network['chain_id'] }],
       });
+      return true;
     } catch (switchError) {
       // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
@@ -37,6 +43,7 @@ async function setNetwork() {
               },
             ],
           });
+          return true;
         } catch (addError) {
           console.log(addError);
         }
@@ -144,28 +151,20 @@ function make_txn(txn, account, value) {
 
 function buy_token(token_id, price) {
     getAccount().then(account => {
-        if (window.ethereum.networkVersion !== '97') {
-            alert('Please select BSC test network in MetaMask');
-        } else {
-            contract_buy_token(account, token_id, price);
-        }
+        contract_buy_token(account, token_id, price);
     });
 }
 function buy_and_mint_token(tank_id, token_uri, price) {
   getAccount().then(account => {
-      if (window.ethereum.networkVersion !== '97') {
-          alert('Please select BSC test network in MetaMask');
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/new_token_id/' + tank_id, false);
+      xhr.send();
+      if (xhr.status !== 200) {
+          console.log( xhr.status + ': ' + xhr.statusText );
       } else {
-          let xhr = new XMLHttpRequest();
-          xhr.open('GET', '/api/new_token_id/' + tank_id, false);
-          xhr.send();
-          if (xhr.status !== 200) {
-              console.log( xhr.status + ': ' + xhr.statusText );
-          } else {
-              let data = JSON.parse(xhr.responseText);
-              const token_id = data['token_id']
-              contract_buy_mint_token(account, token_id, token_uri, price);
-          }
+          let data = JSON.parse(xhr.responseText);
+          const token_id = data['token_id']
+          contract_buy_mint_token(account, token_id, token_uri, price);
       }
   });
 }
