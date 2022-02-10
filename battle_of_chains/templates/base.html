@@ -48,6 +48,7 @@
           </div>
           <div class="login">
             {% if request.user.is_authenticated %}
+              <span class="wallet-id"></span>
               <a href="/accounts/logout/?next=/marketplace/">Log Out</a>
             {% else %}
               <a href="/accounts/login/?next=/marketplace/">Log In</a>

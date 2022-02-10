@@ -140,7 +140,7 @@
     })
     {% if request.user.is_authenticated %}
       set_account().then(result => {
-        console.log(result);
+        document.querySelector('.wallet-id').textContent = result;
         getChainId().then(result => {
           if (result !== '{{ global_settings.active_network.chain_id }}') {
             setNetwork().then(result => {console.log(result)});
