@@ -80,6 +80,9 @@ class TankNftMetaSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     external_url = serializers.SerializerMethodField()
     attributes = serializers.SerializerMethodField()
+    owner_address = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    chain = serializers.SerializerMethodField()
 
     class Meta:
         model = Tank
@@ -90,13 +93,16 @@ class TankNftMetaSerializer(serializers.ModelSerializer):
             'image',
             'external_url',
             'attributes',
+            'owner_address',
+            'price',
+            'chain',
         )
 
     def get_symbol(self, obj):
         return BattleSettings.get_solo().nft_ticker
 
     def get_description(self, obj):
-        return 'Battle of Chains tank NFT'
+        return f'Battle of Chains NFT: {obj.name} #{obj.id}, {obj.type}, {obj.country}'
 
     def get_external_url(self, obj):
         return settings.SITE_URL
@@ -109,6 +115,15 @@ class TankNftMetaSerializer(serializers.ModelSerializer):
             value = getattr(obj, attr)
             attributes.append({'trait_type': attr, 'value': value})
         return attributes
+
+    def get_owner_address(self, obj):
+        return obj.nft.owner.address
+
+    def get_price(self, obj):
+        return obj.price
+
+    def get_chain(self, obj):
+        return obj.nft.contract.network.code
 
 
 class TankNewTokenIdSerializer(serializers.ModelSerializer):

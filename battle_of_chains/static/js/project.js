@@ -141,8 +141,23 @@ function make_txn(txn, account, value) {
                     gasPrice: gas_price,
                     nonce: nonce,
                     value: value
-                }).then(function(receipt){
-                    console.log(receipt);
+                }).on('transactionHash', (hash) => {
+                    console.log(hash);
+                }).on('receipt', (receipt) => {
+                    const csrftoken = getCookie('csrftoken');
+                    let xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/read-events/', false);
+                    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+                    xhr.send("to=" + receipt['to'] + "&transactionHash=" + receipt['transactionHash']);
+                    if (xhr.status !== 200) {
+                      let data = JSON.parse(xhr.responseText);
+                      alert(data['error']);
+                    } else {
+                      window.location.reload();
+                    }
+                }).on('error', (e) => {
+			        console.error(e);
                 });
             })
         })

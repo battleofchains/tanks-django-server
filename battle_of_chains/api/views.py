@@ -75,7 +75,7 @@ class ContractViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
 class TankNftMetaViewSet(RetrieveModelMixin, GenericViewSet):
     serializer_class = TankNftMetaSerializer
-    queryset = Tank.objects.all()
+    queryset = Tank.objects.filter(nft__isnull=False)
     permission_classes = [AllowAny]
 
 
@@ -139,7 +139,7 @@ class ReadBlockchainView(APIView):
         if not tx_hash or not contract_address:
             return Response({'error': 'invalid data received'}, status=HTTP_400_BAD_REQUEST)
         try:
-            contract = Contract.objects.get(address=contract_address)
+            contract = Contract.objects.get(address__iexact=contract_address)
         except Contract.DoesNotExist:
             return Response({'error': f'Contract with address {contract_address} does not exist'},
                             status=HTTP_400_BAD_REQUEST)

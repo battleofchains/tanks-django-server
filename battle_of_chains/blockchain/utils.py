@@ -203,11 +203,8 @@ class SmartContract:
 
     def read_events_by_tx(self, tx_hash):
         tx_receipt = self.w3.eth.get_transaction_receipt(tx_hash)
-        smart_contract = self.w3.eth.contract(
-            abi=self.contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(self.contract.address)
-        )
         for event in EVENTS:
-            processed_logs = smart_contract.events.__getitem__(event)().processReceipt(tx_receipt)
-            assert len(processed_logs) == 1
-            entry = processed_logs[0]
-            self.process_log_entry(entry, event)
+            processed_logs = self.smart_contract.events.__getitem__(event)().processReceipt(tx_receipt)
+            if len(processed_logs) == 1:
+                entry = processed_logs[0]
+                self.process_log_entry(entry, event)
