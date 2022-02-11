@@ -40,16 +40,22 @@ async function setNetwork() {
                 chainName: network['name'],
                 rpcUrls: [network['rpc_url']],
                 blockExplorerUrls: [network['url_explorer']],
-                nativeCurrency: {symbol: network['ticker']},
+                nativeCurrency: {
+                    symbol: network['ticker'],
+                    decimals: 18,
+                    name: network['ticker'],
+                },
               },
             ],
           });
           return true;
         } catch (addError) {
           console.log(addError);
+          return false;
         }
       } else {
           console.log(switchError);
+          return false;
       }
     }
 }
