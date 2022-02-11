@@ -150,14 +150,16 @@ function make_txn(txn, account, value) {
                     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
                     xhr.setRequestHeader('X-CSRFToken', csrftoken);
                     xhr.send("to=" + receipt['to'] + "&transactionHash=" + receipt['transactionHash']);
+                    document.getElementById("tx-spinner").style.display = 'none';
                     if (xhr.status !== 200) {
                       let data = JSON.parse(xhr.responseText);
                       alert(data['error']);
                     } else {
-                      window.location.reload();
+                      document.getElementById('success-modal').style.display = 'block';
                     }
                 }).on('error', (e) => {
 			        console.error(e);
+                    document.getElementById("tx-spinner").style.display = 'none';
                 });
             })
         })
@@ -165,12 +167,14 @@ function make_txn(txn, account, value) {
 }
 
 function buy_token(token_id, price) {
+    document.getElementById("tx-spinner").style.display = "block";
     getAccount().then(account => {
         contract_buy_token(account, token_id, price);
     });
 }
 function buy_and_mint_token(tank_id, token_uri, price) {
-  getAccount().then(account => {
+    document.getElementById("tx-spinner").style.display = "block";
+    getAccount().then(account => {
       let xhr = new XMLHttpRequest();
       xhr.open('GET', '/api/new_token_id/' + tank_id, false);
       xhr.send();
@@ -181,5 +185,5 @@ function buy_and_mint_token(tank_id, token_uri, price) {
           const token_id = data['token_id']
           contract_buy_mint_token(account, token_id, token_uri, price);
       }
-  });
+    });
 }

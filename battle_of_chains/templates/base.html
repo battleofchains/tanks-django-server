@@ -46,7 +46,7 @@
             <div class="col">Help&nbspCenter</div>
             <div class="col">Download</div>
           </div>
-          <div class="login">
+          <div class="login-button">
             {% if request.user.is_authenticated %}
               <span class="wallet-id"></span>
               <a href="/accounts/logout/?next=/marketplace/">Log Out</a>
@@ -67,7 +67,28 @@
 
     </div> <!-- /container -->
 
-    {% block modal %}{% endblock modal %}
+    {% block modal %}
+      <div class="modal fade show" id="tx-spinner">
+        <div class="spinner-grow spinner-grow-lg tx-spinner" role="status"></div>
+      </div>
+      <!-- Modal -->
+      <div class="modal fade show" id="success-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content justify-content-center" style="color: #24262C">
+            <div class="modal-header">
+              <h5 class="modal-title">Transaction success!</h5>
+            </div>
+            <div class="modal-body text-center">
+              Your new tank is being shipped to your hangar
+            </div>
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="window.location.reload();">Ok</button>
+              <button type="button" class="btn btn-primary"><a href="#">Go to hangar</a></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock modal %}
 
     {% block inline_javascript %}
     {% endblock inline_javascript %}

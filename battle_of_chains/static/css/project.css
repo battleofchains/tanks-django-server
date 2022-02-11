@@ -140,7 +140,7 @@ a:hover {
 .reflex-filters-wrapper {
   padding: 20px 10px;
 }
-.login > a {
+.login-button > a {
   background: #FE7524;
   width: 75px;
   height: 40px;
@@ -212,7 +212,16 @@ a:hover {
   font-size: 14px;
   margin-right: 10px;
 }
-.login {
+.login-button {
   display: flex;
   align-items: center;
+}
+.tx-spinner {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  margin-left: -4rem;
+  width: 4rem;
+  height: 4rem;
+  color: #FE7524;
 }

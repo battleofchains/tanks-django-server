@@ -23,4 +23,4 @@ class Offer(models.Model):
 
     def save(self, *args, **kwargs):
         super(Offer, self).save(*args, **kwargs)
-        self.base_tank.save()
+        self.base_tank.save()  # to update Tank.date_add field for marketplace logic

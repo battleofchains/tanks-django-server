@@ -37,6 +37,9 @@ def create_tank_from_offer(offer: Offer) -> Tank:
         projectile.pk = None
         projectile.tank = tank
         projectile.save()
+    if offer.amount_left <= 0:
+        offer.is_active = False
+        offer.save()
     return tank
 
 
