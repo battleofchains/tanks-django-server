@@ -23,6 +23,7 @@ class Network(models.Model):
     name = models.CharField(max_length=100, verbose_name='Name')
     code = models.CharField(max_length=50, verbose_name='Code', default='')
     chain_id = models.CharField(max_length=10, verbose_name='Chain ID, Hex string', default='', blank=False)
+    ticker = models.CharField(max_length=6, verbose_name='Network currency ticker', default='', blank=False)
     rpc_url = models.URLField(verbose_name='RPC URL')
     url_explorer = models.URLField(verbose_name='URL Explorer')
 

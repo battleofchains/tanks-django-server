@@ -39,7 +39,8 @@ async function setNetwork() {
                 chainId: network['chain_id'],
                 chainName: network['name'],
                 rpcUrls: [network['rpc_url']],
-                blockExplorerUrls: [network['url_explorer']]
+                blockExplorerUrls: [network['url_explorer']],
+                nativeCurrency: {symbol: network['ticker']},
               },
             ],
           });
