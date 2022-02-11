@@ -190,6 +190,7 @@ function buy_and_mint_token(tank_id, token_uri, price) {
       } else {
           let data = JSON.parse(xhr.responseText);
           const token_id = data['token_id']
+          token_uri = data['meta_url']
           contract_buy_mint_token(account, token_id, token_uri, price);
       }
     });

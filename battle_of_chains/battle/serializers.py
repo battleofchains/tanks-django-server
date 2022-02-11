@@ -1,6 +1,8 @@
 from datetime import timedelta
+from urllib.parse import urljoin
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
@@ -128,10 +130,11 @@ class TankNftMetaSerializer(serializers.ModelSerializer):
 
 class TankNewTokenIdSerializer(serializers.ModelSerializer):
     token_id = serializers.SerializerMethodField()
+    meta_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Tank
-        fields = ('name', 'token_id')
+        fields = ('name', 'token_id', 'meta_url')
 
     def get_token_id(self, obj):
         if obj.basic_free_tank:
@@ -145,15 +148,22 @@ class TankNewTokenIdSerializer(serializers.ModelSerializer):
                     date_add__lt=timezone.now() - timedelta(seconds=60*15)
                 ).first()
                 if existing:
+                    self.token_id_cached = existing.id
                     return existing.id
                 new_tank = create_tank_from_offer(obj.offer)
+                self.token_id_cached = new_tank.id
                 return new_tank.id
             else:
                 raise TankTokenException(detail='This tank has no offer', code='no_offer')
         elif not hasattr(obj, 'nft'):
+            self.token_id_cached = obj.id
             return obj.id
         else:
             raise TankTokenException()
+
+    def get_meta_url(self, obj):
+        token_id = self.token_id_cached
+        return urljoin(settings.SITE_URL, reverse('api:nft_meta-detail', args=[token_id]))
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
