@@ -1,0 +1,39 @@
+<script>
+  const mintModal = document.getElementById('mint-modal');
+  const listModal = document.getElementById('list-modal');
+
+  function tank_action(tank_id, has_nft, nft_meta_url) {
+    if (has_nft===true) {
+      listModal.querySelector('input[name="tank-id"]').setAttribute('value', tank_id);
+      document.getElementById('list-id').textContent = tank_id;
+      listModal.style.display = "block";
+    } else {
+      mintModal.querySelector('input[name="tank-id"]').setAttribute('value', tank_id);
+      mintModal.querySelector('input[name="nft-meta-url"]').setAttribute('value', nft_meta_url);
+      document.getElementById('mint-id').textContent = tank_id;
+      mintModal.style.display = "block";
+    }
+  }
+
+  function closeModal() {
+    mintModal.style.display = "none";
+    listModal.style.display = "none";
+  }
+
+  function mint_tank() {
+    let tank_id = mintModal.querySelector('input[name="tank-id"]').getAttribute('value');
+    let token_uri = mintModal.querySelector('input[name="nft-meta-url"]').getAttribute('value');
+    console.log(tank_id, token_uri);
+    mint_token(tank_id, token_uri, 0);
+    mintModal.style.display = "none";
+  }
+
+  function list_tank() {
+    let tank_id = listModal.querySelector('input[name="tank-id"]').getAttribute('value');
+    let list = listModal.querySelector('input[name="list-token"]').getAttribute('value');
+    let price = listModal.querySelector('input[name="token-price"]').getAttribute('value');
+    console.log(tank_id, list, price);
+    list_token(tank_id, list, price);
+    listModal.style.display = "none";
+  }
+</script>

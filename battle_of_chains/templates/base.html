@@ -40,8 +40,8 @@
         <div class="container">
           <img src="{% static 'images/Logo.png' %}" alt="logo">
           <div class="menu row">
-            <div class="col">Dashboard</div>
-            <div class="col">Marketplace</div>
+            <div class="col"><a href="{% url 'users:hangar' %}">My&nbsphangar</a></div>
+            <div class="col"><a href="{% url 'market:marketplace' %}">Marketplace</a></div>
             <div class="col">Staking</div>
             <div class="col">Help&nbspCenter</div>
             <div class="col">Download</div>

@@ -21,7 +21,9 @@ class MarketPlaceView(TemplateView):
         )
         tanks = Tank.objects.filter(
             Q(for_sale=True, basic_free_tank=False) | Q(basic_free_tank=True, offer__is_active=True)
-        ).annotate(primary=F('offer__is_active'), price_actual=price_field).order_by(context['order_by'])
+        ).select_related('nft', 'type', 'offer').annotate(
+            primary=F('offer__is_active'), price_actual=price_field
+        ).order_by(context['order_by'])
         context['type_filter'] = TankType.objects.values_list('id', 'name')
         paginator = Paginator(tanks, battle_settings.tanks_per_page)
         context['paginator'] = paginator

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static truncate_trailing_zeroes solo_tags %}
+{% block javascript %}
+  <script src="{% static 'js/web3.min.js' %}"></script>
+  <script src="{% static 'js/project.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-8">
+      <div class="row">
+
+      </div>
+      <div class="row">
+
+      </div>
+      <hr>
+      <div class="row row-cols-4">
+      {% for tank in tanks %}
+        <div class="col">
+          <div class="card-wrap">
+            <a href="{% url 'users:hangar-detail' tank.id %}" class="card-top" style="background-image: url('{% if tank.image %}{{ tank.image.url }}{% endif %}');">
+              <div>
+                <span class="tank-id"># {{ tank.id }}</span>
+                <span class="tank-type">{{ tank.type }}</span>
+              </div>
+            </a>
+            <div class="card-bottom">
+              <div class="card-bottom-1">
+                <div class="tank-name">{{ tank.name }}</div>
+                <div class="small-text">{{ tank.type }}</div>
+              </div>
+              <div class="card-bottom-2">
+                <img src="{% static 'images/cart-btn.png' %}" alt="cart"
+                  onclick="tank_action({{ tank.id }}, {% if tank.has_nft %}true{% else %}false{% endif %}, '{{ tank.nft_meta_url }}')"
+                >
+                <div class="tank-price">
+                  <img src="{% static 'images/price-icon.png' %}" style="margin-right: 8px;" alt="">
+                  {{ tank.price|truncate_trailing_zeroes }} BNB
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block modal %}
+  {{ block.super }}
+  {% include 'includes/hangar_modals.html' %}
+{% endblock %}
+
+{% block inline_javascript %}
+  {% get_solo 'battle.BattleSettings' as global_settings %}
+  <script>
+    set_account().then(result => {
+      document.querySelector('.wallet-id').textContent = result;
+      getChainId().then(result => {
+        if (result !== '{{ global_settings.active_network.chain_id }}') {
+          setNetwork().then(result => {console.log(result)});
+        }
+      });
+    }).catch(err => {console.log(err)});
+  </script>
+  {% include 'includes/hangar_script.html' %}
+{% endblock inline_javascript %}

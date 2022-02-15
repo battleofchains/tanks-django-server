@@ -1,0 +1,34 @@
+<div class="modal fade show" id="mint-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <input type="hidden" name="tank-id" value="">
+  <input type="hidden" name="nft-meta-url" value="">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content justify-content-center" style="color: #24262C">
+      <div class="modal-body text-center">
+        Do you want to mint your tank #<span id="mint-id"></span>?
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-primary" onclick="mint_tank();">Yes</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal();">No</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade show" id="list-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <input type="hidden" name="tank-id" value="">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content justify-content-center" style="color: #24262C">
+      <div class="modal-body text-center">
+        Change listing status for your tank #<span id="list-id"></span>?
+      </div>
+      <div class="modal-footer justify-content-evenly">
+        <label>List for sale: <input type="checkbox" name="list-token"></label>
+        <label>Set price (BNB): <input type="number" name="token-price" placeholder="0" min="0" step="0.01" style="max-width: 4em;"></label>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-primary" onclick="list_tank();">Yes</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal();">No</button>
+      </div>
+    </div>
+  </div>
+</div>

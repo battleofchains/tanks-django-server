@@ -3,19 +3,37 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, RedirectView, UpdateView
+from django.views.generic import DetailView, RedirectView, TemplateView, UpdateView
+
+from battle_of_chains.battle.models import Tank
 
 User = get_user_model()
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
+class HangarView(LoginRequiredMixin, TemplateView):
+    template_name = 'pages/hangar.html'
 
-    model = User
-    slug_field = "username"
-    slug_url_kwarg = "username"
+    def get_context_data(self, **kwargs):
+        context = super(HangarView, self).get_context_data(**kwargs)
+        context['tanks'] = Tank.objects.filter(owner=self.request.user).select_related('nft', 'type')
+        context['last_offer'] = Tank.objects.filter(
+            basic_free_tank=True, offer__is_active=True).select_related('type').order_by('-date_mod').first()
+        return context
 
 
-user_detail_view = UserDetailView.as_view()
+class HangarDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'pages/hangar_detail.html'
+
+    def get_queryset(self):
+        return Tank.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tank = self.object
+        context['tank'] = tank
+        props = ('level', 'moving_price', 'overlook', 'hp', 'armor')
+        context['props'] = {k: v for k, v in tank.__dict__.items() if k in props}
+        return context
 
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -39,7 +57,7 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        return reverse("users:detail", kwargs={"username": self.request.user.username})
+        return reverse("users:hangar", kwargs={"username": self.request.user.username})
 
 
 user_redirect_view = UserRedirectView.as_view()
