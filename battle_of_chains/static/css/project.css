@@ -225,3 +225,15 @@ a:hover {
   height: 4rem;
   color: #FE7524;
 }
+.network-info {
+  background: linear-gradient(98.49deg, #EFCB4C 0.63%, #FE7524 98.77%);
+  border-radius: 10px;
+}
+.user-stats {
+  background: linear-gradient(257.09deg, #FE7524 -32.14%, #141416 77.14%);
+}
+.get-token {
+  background: #141416;
+  box-shadow: 0 2px 30px rgba(254, 117, 36, 0.15);
+  border-radius: 10px;
+}

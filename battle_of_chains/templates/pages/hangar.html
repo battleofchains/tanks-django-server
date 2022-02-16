@@ -20,13 +20,31 @@
         </div>
         <div class="col-10 card-wrap info-wrap">
           <div class="info-text">My wallet <span>{{ request.user.wallet }}</span></div>
-          <div class="network-info">
+          <div class="network-info info-wrap">
             <p>{{ global_settings.active_network.name }}</p>
+            <div class="user-assets row">
+              {% for currency, value, usd in user_assets %}
+              <div class="col-4">
+                <p>{{ value }} {{ currency }}</p>
+                <p>{{ usd }} USD</p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="row get-token info-wrap">
+            <div class="col" style="border-right: 1px solid white;">Where to get TNK</div>
+            <div class="col"><a href="#"><img src=""></a></div>
+            <div class="col"></div>
           </div>
         </div>
       </div>
-      <div class="row">
-
+      <div class="row row-cols-2">
+        <div class="col card-wrap info-wrap user-stats">
+          <div class="info-text">Статистика боёв</div>
+        </div>
+        <div class="col card-wrap">
+          <img src="{{ last_offer.image.url }}" alt="offer"/>
+        </div>
       </div>
       <hr>
       <div class="row row-cols-4">

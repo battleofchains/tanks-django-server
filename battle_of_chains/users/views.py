@@ -7,6 +7,7 @@ from django.views.generic import DetailView, RedirectView, TemplateView, UpdateV
 
 from battle_of_chains.battle.models import Tank
 from battle_of_chains.market.models import Banner
+from battle_of_chains.blockchain.utils import get_w3_provider
 
 User = get_user_model()
 
@@ -18,6 +19,12 @@ class HangarView(LoginRequiredMixin, TemplateView):
         context = super(HangarView, self).get_context_data(**kwargs)
         context['tanks'] = Tank.objects.filter(owner=self.request.user).select_related('nft', 'type')
         context['last_offer'] = Banner.objects.filter(is_active=True).order_by('-date_add').first()
+        user = self.request.user
+        user_assets = []
+        if user.wallet:
+            w3 = get_w3_provider()
+            bnb = w3.eth.get_balance(user.wallet.address)
+            user_assets.append(('bnb', bnb, 0))
         return context
 
 
