@@ -10,17 +10,25 @@ async function getChainId() {
     return await ethereum.request({ method: 'eth_chainId' });
 }
 
-async function setNetwork() {
+function get_global_settings() {
     let xhr = new XMLHttpRequest();
-    let network;
     xhr.open('GET', '/api/settings/', false);
     xhr.send();
     if (xhr.status !== 200) {
       console.log( xhr.status + ': ' + xhr.statusText );
       return false;
     } else {
-      let data = JSON.parse(xhr.responseText);
-      network = data['active_network'];
+      return JSON.parse(xhr.responseText);
+    }
+}
+
+async function setNetwork() {
+    let network;
+    const settings = get_global_settings();
+    if (settings === false) {
+      return false;
+    } else {
+      network = settings['active_network'];
     }
     try {
       await ethereum.request({
@@ -61,24 +69,29 @@ async function setNetwork() {
 }
 
 function get_contract() {
-    let xhr = new XMLHttpRequest();
-    let abi;
-    let contract_address;
-    xhr.open('GET', '/api/contracts/', false);
-    xhr.send();
-    if (xhr.status !== 200) {
-      console.log( xhr.status + ': ' + xhr.statusText );
+    const settings = get_global_settings();
+    if (settings === false) {
+        return false;
     } else {
-      let data = JSON.parse(xhr.responseText);
-      data.forEach((element) => {
-        if (element.symbol === 'TNKNFT') {
-          abi = element.contract_definitions.abi;
-          contract_address = element.address;
-          console.log(contract_address);
+        let xhr = new XMLHttpRequest();
+        let abi;
+        let contract_address;
+        xhr.open('GET', '/api/contracts/', false);
+        xhr.send();
+        if (xhr.status !== 200) {
+          console.log( xhr.status + ': ' + xhr.statusText );
+        } else {
+          let data = JSON.parse(xhr.responseText);
+          data.forEach((element) => {
+            if (element.symbol === settings['nft_ticker']) {
+              abi = element.contract_definitions.abi;
+              contract_address = element.address;
+              console.log(contract_address);
+            }
+          })
         }
-      })
+        return new web3.eth.Contract(abi, contract_address);
     }
-    return new web3.eth.Contract(abi, contract_address);
 }
 
 async function set_account() {

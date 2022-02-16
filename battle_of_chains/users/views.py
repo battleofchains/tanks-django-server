@@ -5,9 +5,10 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView, TemplateView, UpdateView
 
-from battle_of_chains.battle.models import Tank
+from battle_of_chains.battle.models import BattleSettings, Tank
+from battle_of_chains.blockchain.models import Contract
+from battle_of_chains.blockchain.utils import SmartContract
 from battle_of_chains.market.models import Banner
-from battle_of_chains.blockchain.utils import get_w3_provider
 
 User = get_user_model()
 
@@ -17,14 +18,24 @@ class HangarView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(HangarView, self).get_context_data(**kwargs)
+        global_settings = BattleSettings.get_solo()
+        context['global_settings'] = global_settings
         context['tanks'] = Tank.objects.filter(owner=self.request.user).select_related('nft', 'type')
         context['last_offer'] = Banner.objects.filter(is_active=True).order_by('-date_add').first()
         user = self.request.user
         user_assets = []
         if user.wallet:
-            w3 = get_w3_provider()
-            bnb = w3.eth.get_balance(user.wallet.address)
-            user_assets.append(('bnb', bnb, 0))
+            contract = Contract.objects.filter(is_active=True, symbol=global_settings.nft_ticker).first()
+            smart_contract = SmartContract(contract)
+
+            bnb = smart_contract.w3.eth.get_balance(smart_contract.w3.toChecksumAddress(user.wallet.address))
+            bnb = smart_contract.w3.fromWei(bnb, 'ether')
+            user_assets.append((global_settings.active_network.ticker, bnb, 0))
+
+            value = smart_contract.get_user_balance(user.wallet.address)
+            user_assets.append((contract.symbol, value, 0))
+
+        context['user_assets'] = user_assets
         return context
 
 

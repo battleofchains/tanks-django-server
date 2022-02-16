@@ -1,49 +1,71 @@
 {% extends "base.html" %}
-{% load static truncate_trailing_zeroes solo_tags %}
+{% load static custom_tags %}
 {% block javascript %}
   <script src="{% static 'js/web3.min.js' %}"></script>
   <script src="{% static 'js/project.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-  {% get_solo 'battle.BattleSettings' as global_settings %}
   <div class="row justify-content-center">
-    <div class="col-8">
-      <div class="row">
+    <div class="col-9">
+      <div class="row justify-content-between">
         <div class="col-2">
-          <img src="{% if request.user.avatar %}
-                      {{ request.user.avatar.url }}
-                    {% elif global_settings.default_avatar %}
-                      {{ global_settings.default_avatar.url }}
-                    {% endif %}" alt="avatar">
-          <p>{{ request.user.username }}</p>
-        </div>
-        <div class="col-10 card-wrap info-wrap">
-          <div class="info-text">My wallet <span>{{ request.user.wallet }}</span></div>
-          <div class="network-info info-wrap">
-            <p>{{ global_settings.active_network.name }}</p>
-            <div class="user-assets row">
-              {% for currency, value, usd in user_assets %}
-              <div class="col-4">
-                <p>{{ value }} {{ currency }}</p>
-                <p>{{ usd }} USD</p>
-              </div>
-              {% endfor %}
-            </div>
+          <div class="user-avatar">
+            <img src="{% if request.user.avatar %}
+                        {{ request.user.avatar.url }}
+                      {% elif global_settings.default_avatar %}
+                        {{ global_settings.default_avatar.url }}
+                      {% endif %}" alt="avatar" width="100">
           </div>
-          <div class="row get-token info-wrap">
-            <div class="col" style="border-right: 1px solid white;">Where to get TNK</div>
-            <div class="col"><a href="#"><img src=""></a></div>
-            <div class="col"></div>
+          <p class="user-name">{{ request.user.username }}</p>
+        </div>
+        <div class="col-9">
+          <div class="card-wrap info-wrap">
+            <div class="info-text">
+              <span>My wallet</span>
+              <span class="wallet-info">{{ request.user.wallet }}</span>
+            </div>
+            <div class="network-info info-wrap">
+              <p>{{ global_settings.active_network.name }}</p>
+              <div class="user-assets row">
+                {% for currency, value, usd in user_assets %}
+                <div class="col-4 currency-value">
+                  <p>{{ value }} {{ currency }}</p>
+                  <p>{{ usd }} USD</p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="get-token info-wrap justify-content-evenly align-items-center">
+              <div class="col text-center">Where to get TNK</div>
+              <div class="col text-center">
+                <a href="https://binance.com" target="_blank"><img src="{% static 'images/binance.png' %}" alt="binance"></a>
+              </div>
+              <div class="col text-center">
+                <a href="https://upbit.com" target="_blank"><img src="{% static 'images/upbit.png' %}" alt="upbit"></a>
+              </div>
+              <div class="col text-center">
+                <a href="https://www.huobi.com" target="_blank"><img src="{% static 'images/huobi.png' %}" alt="huobi"></a>
+              </div>
+              <div class="col text-center">
+                <a href="https://uniswap.org" target="_blank"><img src="{% static 'images/uniswap.png' %}" alt="uniswap"></a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div class="row row-cols-2">
-        <div class="col card-wrap info-wrap user-stats">
-          <div class="info-text">Статистика боёв</div>
+        <div class="col">
+          <div class="card-wrap info-wrap user-stats">
+            <div class="info-text">Статистика боёв</div>
+          </div>
         </div>
-        <div class="col card-wrap">
-          <img src="{{ last_offer.image.url }}" alt="offer"/>
+        <div class="col">
+          <div class="card-wrap">
+            <a href="{{ last_offer.link }}" target="_blank">
+              <img src="{{ last_offer.image.url }}" alt="{{ last_offer.title }}" class="banner"/>
+            </a>
+          </div>
         </div>
       </div>
       <hr>
@@ -87,7 +109,6 @@
 {% endblock %}
 
 {% block inline_javascript %}
-  {% get_solo 'battle.BattleSettings' as global_settings %}
   <script>
     set_account().then(result => {
       document.querySelector('.wallet-id').textContent = result;

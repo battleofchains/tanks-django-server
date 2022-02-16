@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static truncate_trailing_zeroes solo_tags %}
+{% load static custom_tags solo_tags %}
 {% block javascript %}
   <script src="{% static 'dist/js/reflex.js' %}"></script>
   <script src="{% static 'js/web3.min.js' %}"></script>
@@ -73,7 +73,13 @@
                 <div class="card-bottom-2">
                   <img src="{% static 'images/cart-btn.png' %}" alt="cart"
                     {% if request.user.is_authenticated %}
-                       onclick="{% if tank.has_nft %}buy_token({{ tank.id }}, {{ tank.price }}){% else %}buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %}){% endif %}"
+                      {% if tank.has_offer and tank.offer.id in bought_offers.keys %}
+                       onclick="window.location.href='/user/hangar/{{ bought_offers|get_item:tank.offer.id }}'"
+                      {% elif tank.has_nft %}
+                       onclick="buy_token({{ tank.id }}, {{ tank.price }})"
+                      {% else %}
+                       onclick="buy_and_mint_token({{ tank.id }}, '{{ tank.nft_meta_url }}', {% if tank.has_offer %}{{ tank.offer.price }}{% else %}{{ tank.price }}{% endif %})"
+                      {% endif %}
                     {% else %}
                        onclick="window.location.href='/accounts/login/?next=/marketplace/'"
                     {% endif %}

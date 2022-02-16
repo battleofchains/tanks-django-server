@@ -217,3 +217,7 @@ class SmartContract:
             if len(processed_logs) == 1:
                 entry = processed_logs[0]
                 self.process_log_entry(entry, event)
+
+    def get_user_balance(self, address):
+        address = self.w3.toChecksumAddress(address)
+        return self.smart_contract.functions.balanceOf(address).call()
