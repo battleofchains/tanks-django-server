@@ -6,10 +6,24 @@
 {% endblock %}
 
 {% block content %}
+  {% get_solo 'battle.BattleSettings' as global_settings %}
   <div class="row justify-content-center">
     <div class="col-8">
       <div class="row">
-
+        <div class="col-2">
+          <img src="{% if request.user.avatar %}
+                      {{ request.user.avatar.url }}
+                    {% elif global_settings.default_avatar %}
+                      {{ global_settings.default_avatar.url }}
+                    {% endif %}" alt="avatar">
+          <p>{{ request.user.username }}</p>
+        </div>
+        <div class="col-10 card-wrap info-wrap">
+          <div class="info-text">My wallet <span>{{ request.user.wallet }}</span></div>
+          <div class="network-info">
+            <p>{{ global_settings.active_network.name }}</p>
+          </div>
+        </div>
       </div>
       <div class="row">
 

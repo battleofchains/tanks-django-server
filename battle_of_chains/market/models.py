@@ -24,3 +24,14 @@ class Offer(models.Model):
     def save(self, *args, **kwargs):
         super(Offer, self).save(*args, **kwargs)
         self.base_tank.save()  # to update Tank.date_add field for marketplace logic
+
+
+class Banner(models.Model):
+    title = models.CharField(max_length=255)
+    image = models.ImageField()
+    link = models.URLField()
+    date_add = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title

@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView, TemplateView, UpdateView
 
 from battle_of_chains.battle.models import Tank
+from battle_of_chains.market.models import Banner
 
 User = get_user_model()
 
@@ -16,8 +17,7 @@ class HangarView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(HangarView, self).get_context_data(**kwargs)
         context['tanks'] = Tank.objects.filter(owner=self.request.user).select_related('nft', 'type')
-        context['last_offer'] = Tank.objects.filter(
-            basic_free_tank=True, offer__is_active=True).select_related('type').order_by('-date_mod').first()
+        context['last_offer'] = Banner.objects.filter(is_active=True).order_by('-date_add').first()
         return context
 
 

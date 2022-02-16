@@ -197,6 +197,7 @@ class BattleSettings(SingletonModel):
     tanks_per_page = models.PositiveSmallIntegerField(verbose_name='Tanks per page in marketplace', default=14)
     nft_ticker = models.CharField(max_length=10, default='TNKNFT', verbose_name='NFT contract Ticker')
     active_network = models.ForeignKey('blockchain.Network', on_delete=models.SET_NULL, blank=True, null=True)
+    default_avatar = models.ImageField(verbose_name='Default user avatar', blank=True, null=True)
 
     def __str__(self):
         return 'Global settings'
