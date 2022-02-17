@@ -1,11 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Sum
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView, TemplateView, UpdateView
 
-from battle_of_chains.battle.models import BattleSettings, Tank
+from battle_of_chains.battle.models import Battle, BattleSettings, Tank
 from battle_of_chains.blockchain.models import Contract
 from battle_of_chains.blockchain.utils import SmartContract
 from battle_of_chains.market.models import Banner
@@ -24,6 +25,7 @@ class HangarView(LoginRequiredMixin, TemplateView):
         context['last_offer'] = Banner.objects.filter(is_active=True).order_by('-date_add').first()
         user = self.request.user
         user_assets = []
+        user_stats = {}
         if user.wallet:
             contract = Contract.objects.filter(is_active=True, symbol=global_settings.nft_ticker).first()
             smart_contract = SmartContract(contract)
@@ -36,6 +38,14 @@ class HangarView(LoginRequiredMixin, TemplateView):
             user_assets.append((contract.symbol, value, 0))
 
         context['user_assets'] = user_assets
+
+        user_stats['xp'] = Tank.objects.filter(owner=user).aggregate(xp_sum=Sum('xp'))['xp_sum']
+        battles = Battle.objects.filter(status=Battle.STATUS.FINISHED, players=user)
+        user_stats['battles'] = battles.count()
+        user_stats['wins'] = battles.filter(winner=user).count()
+        user_stats['tanks_killed'] = 0
+        context['user_stats'] = user_stats
+
         return context
 
 

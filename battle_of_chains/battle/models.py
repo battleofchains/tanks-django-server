@@ -89,6 +89,7 @@ class Tank(models.Model):
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name='tanks', null=True, blank=True)
     hp = models.PositiveIntegerField(default=100)
+    xp = models.PositiveIntegerField(default=0)
     moving_price = models.PositiveIntegerField(default=1)
     critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %",
                                                        validators=[MaxValueValidator(100)])

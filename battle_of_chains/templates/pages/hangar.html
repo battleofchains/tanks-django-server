@@ -54,13 +54,27 @@
           </div>
         </div>
       </div>
-      <div class="row row-cols-2">
-        <div class="col">
+      <div class="row">
+        <div class="col-6">
           <div class="card-wrap info-wrap user-stats">
             <div class="info-text">Статистика боёв</div>
+            <div class="row">
+              {% for key, value in user_stats.items %}
+                <div class="col-6">
+                  <div class="row align-items-center user-stats-row">
+                    <div class="col-6">
+                      <img src="{% static 'images/'|add:key|add:'.svg' %}" alt="{{ key }}" class="stat-icon">
+                    </div>
+                    <div class="col-6">
+                      <span class="stat-value">{{ value }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
-        <div class="col">
+        <div class="col-6">
           <div class="card-wrap">
             <a href="{{ last_offer.link }}" target="_blank">
               <img src="{{ last_offer.image.url }}" alt="{{ last_offer.title }}" class="banner"/>

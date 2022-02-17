@@ -236,6 +236,7 @@ a:hover {
 }
 .user-stats {
   background: linear-gradient(257.09deg, #FE7524 -32.14%, #141416 77.14%);
+  padding-bottom: 5px;
 }
 .get-token {
   background: #141416;
@@ -295,4 +296,11 @@ a:hover {
 }
 .banner {
   width: 100%;
+}
+.stat-value {
+  font-weight: bold;
+  font-size: 24px;
+}
+.user-stats-row {
+  height: 74px;
 }
