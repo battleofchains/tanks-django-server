@@ -304,3 +304,11 @@ a:hover {
 .user-stats-row {
   height: 74px;
 }
+.user-nav-values > div > div {
+  font-weight: 500;
+  font-size: 18px;
+}
+.user-nav-values {
+  border-left: 1px solid #777E91;
+  border-right: 1px solid #777E91;
+}
