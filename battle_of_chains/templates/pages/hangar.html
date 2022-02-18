@@ -38,11 +38,13 @@
       <div class="row justify-content-between">
         <div class="col-2">
           <div class="user-avatar">
-            <img src="{% if request.user.avatar %}
+            <a href="{% url 'users:update' %}">
+              <img src="{% if request.user.avatar %}
                         {{ request.user.avatar.url }}
                       {% elif global_settings.default_avatar %}
                         {{ global_settings.default_avatar.url }}
                       {% endif %}" alt="avatar" width="100">
+            </a>
           </div>
           <p class="user-name">{{ request.user.username }}</p>
         </div>

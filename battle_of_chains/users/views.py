@@ -67,7 +67,7 @@ class HangarDetailView(LoginRequiredMixin, DetailView):
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 
     model = User
-    fields = ["username"]
+    fields = ["username", "notifications_disabled", "avatar"]
     success_message = _("Information successfully updated")
 
     def get_success_url(self):
