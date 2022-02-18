@@ -40,8 +40,8 @@
         <div class="container">
           <img src="{% static 'images/Logo.png' %}" alt="logo">
           <div class="menu row">
-            <div class="col">Dashboard</div>
-            <div class="col">Marketplace</div>
+            <div class="col"><a href="{% url 'users:hangar' %}">My&nbsphangar</a></div>
+            <div class="col"><a href="{% url 'market:marketplace' %}">Marketplace</a></div>
             <div class="col">Staking</div>
             <div class="col">Help&nbspCenter</div>
             <div class="col">Download</div>
@@ -83,7 +83,7 @@
             </div>
             <div class="modal-footer justify-content-center">
               <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="window.location.reload();">Ok</button>
-              <button type="button" class="btn btn-primary"><a href="#">Go to hangar</a></button>
+              <button type="button" class="btn btn-primary"><a href="{% url 'users:hangar' %}">Go to hangar</a></button>
             </div>
           </div>
         </div>

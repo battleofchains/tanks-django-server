@@ -89,6 +89,7 @@ class Tank(models.Model):
     image = models.ImageField(upload_to=upload_tank_path, null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name='tanks', null=True, blank=True)
     hp = models.PositiveIntegerField(default=100)
+    xp = models.PositiveIntegerField(default=0)
     moving_price = models.PositiveIntegerField(default=1)
     critical_chance = models.PositiveSmallIntegerField(default=1, verbose_name="Critical hit chance, %",
                                                        validators=[MaxValueValidator(100)])
@@ -197,6 +198,7 @@ class BattleSettings(SingletonModel):
     tanks_per_page = models.PositiveSmallIntegerField(verbose_name='Tanks per page in marketplace', default=14)
     nft_ticker = models.CharField(max_length=10, default='TNKNFT', verbose_name='NFT contract Ticker')
     active_network = models.ForeignKey('blockchain.Network', on_delete=models.SET_NULL, blank=True, null=True)
+    default_avatar = models.ImageField(verbose_name='Default user avatar', blank=True, null=True)
 
     def __str__(self):
         return 'Global settings'

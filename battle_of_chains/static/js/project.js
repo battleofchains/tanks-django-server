@@ -10,17 +10,25 @@ async function getChainId() {
     return await ethereum.request({ method: 'eth_chainId' });
 }
 
-async function setNetwork() {
+function get_global_settings() {
     let xhr = new XMLHttpRequest();
-    let network;
     xhr.open('GET', '/api/settings/', false);
     xhr.send();
     if (xhr.status !== 200) {
       console.log( xhr.status + ': ' + xhr.statusText );
       return false;
     } else {
-      let data = JSON.parse(xhr.responseText);
-      network = data['active_network'];
+      return JSON.parse(xhr.responseText);
+    }
+}
+
+async function setNetwork() {
+    let network;
+    const settings = get_global_settings();
+    if (settings === false) {
+      return false;
+    } else {
+      network = settings['active_network'];
     }
     try {
       await ethereum.request({
@@ -61,24 +69,29 @@ async function setNetwork() {
 }
 
 function get_contract() {
-    let xhr = new XMLHttpRequest();
-    let abi;
-    let contract_address;
-    xhr.open('GET', '/api/contracts/', false);
-    xhr.send();
-    if (xhr.status !== 200) {
-      console.log( xhr.status + ': ' + xhr.statusText );
+    const settings = get_global_settings();
+    if (settings === false) {
+        return false;
     } else {
-      let data = JSON.parse(xhr.responseText);
-      data.forEach((element) => {
-        if (element.symbol === 'TNKNFT') {
-          abi = element.contract_definitions.abi;
-          contract_address = element.address;
-          console.log(contract_address);
+        let xhr = new XMLHttpRequest();
+        let abi;
+        let contract_address;
+        xhr.open('GET', '/api/contracts/', false);
+        xhr.send();
+        if (xhr.status !== 200) {
+          console.log( xhr.status + ': ' + xhr.statusText );
+        } else {
+          let data = JSON.parse(xhr.responseText);
+          data.forEach((element) => {
+            if (element.symbol === settings['nft_ticker']) {
+              abi = element.contract_definitions.abi;
+              contract_address = element.address;
+              console.log(contract_address);
+            }
+          })
         }
-      })
+        return new web3.eth.Contract(abi, contract_address);
     }
-    return new web3.eth.Contract(abi, contract_address);
 }
 
 async function set_account() {
@@ -111,27 +124,27 @@ function contract_buy_token(account, token_id, price) {
     let myContract = get_contract();
     price = web3.utils.toWei(price.toString());
     let txn = myContract.methods.buy(token_id);
-    make_txn(txn, account, price)
+    make_txn(txn, account, price);
 }
 
 function contract_buy_mint_token(account, token_id, token_uri, price) {
     let myContract = get_contract();
     price = web3.utils.toWei(price.toString());
     let txn = myContract.methods.buyAndMint(token_id, token_uri, price);
-    make_txn(txn, account, price)
+    make_txn(txn, account, price);
 }
 
-function contract_list_token(account, token_id) {
-    let myContract = get_contract();
-    let txn = myContract.methods.updateListingStatus(token_id, true);
-    make_txn(txn, account, 0)
-}
-
-function contract_set_token_price(account, token_id, price) {
+function contract_list_token(account, token_id, list, price) {
     let myContract = get_contract();
     price = web3.utils.toWei(price.toString());
-    let txn = myContract.methods.updatePrice(token_id, price);
-    make_txn(txn, account, price)
+    let txn = myContract.methods.updateListingStatus(token_id, list, price);
+    make_txn(txn, account, 0);
+}
+
+function contract_mint_token(account, token_id, token_uri, price) {
+    let myContract = get_contract();
+    let txn = myContract.methods.mint(token_id, token_uri, account, price);
+    make_txn(txn, account, 0);
 }
 
 function make_txn(txn, account, value) {
@@ -179,6 +192,14 @@ function buy_token(token_id, price) {
         contract_buy_token(account, token_id, price);
     });
 }
+
+function mint_token(token_id, token_uri, price) {
+    document.getElementById("tx-spinner").style.display = "block";
+    getAccount().then(account => {
+        contract_mint_token(account, token_id, token_uri, price);
+    });
+}
+
 function buy_and_mint_token(tank_id, token_uri, price) {
     document.getElementById("tx-spinner").style.display = "block";
     getAccount().then(account => {
@@ -193,5 +214,12 @@ function buy_and_mint_token(tank_id, token_uri, price) {
           token_uri = data['meta_url']
           contract_buy_mint_token(account, token_id, token_uri, price);
       }
+    });
+}
+
+function list_token(token_id, list, price) {
+    document.getElementById("tx-spinner").style.display = "block";
+    getAccount().then(account => {
+        contract_list_token(account, token_id, list, price);
     });
 }

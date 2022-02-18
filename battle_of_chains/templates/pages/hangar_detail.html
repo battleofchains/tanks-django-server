@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static custom_tags solo_tags %}
+{% block javascript %}
+  <script src="{% static 'js/web3.min.js' %}"></script>
+  <script src="{% static 'js/project.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-8">
+      <div class="row">
+        <div style="margin-bottom: 30px;"><a href="{% url 'users:hangar' %}"><- Back</a></div>
+        <div class="col-6">
+          <img src="{% if tank.image %}{{ tank.image.url }}{% endif %}" alt="tank-image" class="tank-image card-wrap">
+          <p>О танке</p>
+          <p class="tank-desc">{{ tank.description }}</p>
+        </div>
+        <div class="col-6">
+          <div class="row">
+            <div class="col">
+              <span class="tank-id"># {{ tank.id }}</span>
+              <span class="tank-type">{{ tank.type }}</span>
+            </div>
+          </div>
+          <div class="tank-name-detail row">
+            <div class="col">
+              {{ tank.name }}
+            </div>
+          </div>
+          <div class="row card-wrap info-wrap">
+            <div class="info-text">Стоимость</div>
+            <div class="tank-price-detail">
+              <img src="{% static 'images/price-icon-big.png' %}" style="margin-right: 8px;" alt="">
+              {{ tank.price|truncate_trailing_zeroes }} BNB
+            </div>
+            <button class="buy-now"
+                 onclick="tank_action({{ tank.id }}, {% if tank.has_nft %}true{% else %}false{% endif %}, '{{ tank.nft_meta_url }}')"
+              >{% if tank.has_nft %}List{% else %}Mint{% endif %}</button>
+          </div>
+          <div class="row card-wrap info-wrap">
+            <div class="info-text">About</div>
+            {% for name, val in props.items %}
+              <div class="col-6">
+                <p class="prop-name">{{ name }}</p>
+                <p class="prop-val">{{ val }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block modal %}
+  {{ block.super }}
+  {% include 'includes/hangar_modals.html' %}
+{% endblock %}
+
+{% block inline_javascript %}
+  {% get_solo 'battle.BattleSettings' as global_settings %}
+  <script>
+    set_account().then(result => {
+      console.log(result);
+      getChainId().then(result => {
+        if (result !== '{{ global_settings.active_network.chain_id }}') {
+          setNetwork().then(result => {console.log(result)});
+        }
+      });
+    }).catch(err => {console.log(err)});
+  </script>
+  {% include 'includes/hangar_script.html' %}
+{% endblock inline_javascript %}

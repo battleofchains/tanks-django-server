@@ -40,12 +40,17 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+def upload_user_path(instance, filename):
+    return f'users/{instance.pk}/{filename}'
+
+
 class User(AbstractUser):
     """Default user for Battle of Chains."""
 
     email = models.EmailField(_('email address'), unique=True)
     wallet = models.OneToOneField(Wallet, on_delete=models.SET_NULL, blank=True, null=True, related_name='user')
     notifications_disabled = models.BooleanField(default=False)
+    avatar = models.ImageField(blank=True, null=True, upload_to=upload_user_path)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -59,4 +64,4 @@ class User(AbstractUser):
             str: URL for user detail.
 
         """
-        return reverse("users:detail", kwargs={"username": self.username})
+        return reverse("users:hangar")

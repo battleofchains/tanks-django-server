@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static custom_tags %}
+{% block javascript %}
+  <script src="{% static 'js/web3.min.js' %}"></script>
+  <script src="{% static 'js/project.js' %}"></script>
+{% endblock %}
+
+{% block navbar %}
+      <nav class="navbar nav-marketplace">
+        <div class="container">
+          <img src="{% static 'images/Logo.png' %}" alt="logo">
+          <div class="menu row">
+            <div class="col"><a href="{% url 'users:hangar' %}">My&nbsphangar</a></div>
+            <div class="col"><a href="{% url 'market:marketplace' %}">Marketplace</a></div>
+            <div class="col">Staking</div>
+            <div class="col">Help&nbspCenter</div>
+            <div class="col">Download</div>
+          </div>
+          <div class="row user-nav-values">
+            {% for currency, value, usd in user_assets %}
+              {% if forloop.counter < 3 %}
+              <div class="col">
+                <div>{{ value|truncate_trailing_zeroes:4 }}&nbsp{{ currency }}</div>
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="login-button">
+            <a href="/accounts/logout/?next=/marketplace/">Log Out</a>
+          </div>
+        </div>
+      </nav>
+    {% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-9">
+      <div class="row justify-content-between">
+        <div class="col-2">
+          <div class="user-avatar">
+            <a href="{% url 'users:update' %}">
+              <img src="{% if request.user.avatar %}
+                        {{ request.user.avatar.url }}
+                      {% elif global_settings.default_avatar %}
+                        {{ global_settings.default_avatar.url }}
+                      {% endif %}" alt="avatar" width="100">
+            </a>
+          </div>
+          <p class="user-name">{{ request.user.username }}</p>
+        </div>
+        <div class="col-9">
+          <div class="card-wrap info-wrap">
+            <div class="info-text">
+              <span>My wallet</span>
+              <span class="wallet-info">{{ request.user.wallet }}</span>
+            </div>
+            <div class="network-info info-wrap">
+              <p>{{ global_settings.active_network.name }}</p>
+              <div class="user-assets row">
+                {% for currency, value, usd in user_assets %}
+                <div class="col-4 currency-value">
+                  <p>{{ value|truncate_trailing_zeroes }} {{ currency }}</p>
+                  <p>{{ usd }} USD</p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="get-token info-wrap justify-content-evenly align-items-center">
+              <div class="col text-center">Where to get TNK</div>
+              <div class="col text-center">
+                <a href="https://binance.com" target="_blank"><img src="{% static 'images/binance.png' %}" alt="binance"></a>
+              </div>
+              <div class="col text-center">
+                <a href="https://upbit.com" target="_blank"><img src="{% static 'images/upbit.png' %}" alt="upbit"></a>
+              </div>
+              <div class="col text-center">
+                <a href="https://www.huobi.com" target="_blank"><img src="{% static 'images/huobi.png' %}" alt="huobi"></a>
+              </div>
+              <div class="col text-center">
+                <a href="https://uniswap.org" target="_blank"><img src="{% static 'images/uniswap.png' %}" alt="uniswap"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <div class="card-wrap info-wrap user-stats">
+            <div class="info-text">Статистика боёв</div>
+            <div class="row">
+              {% for key, value in user_stats.items %}
+                <div class="col-6">
+                  <div class="row align-items-center user-stats-row">
+                    <div class="col-6">
+                      <img src="{% static 'images/'|add:key|add:'.svg' %}" alt="{{ key }}" class="stat-icon">
+                    </div>
+                    <div class="col-6">
+                      <span class="stat-value">{{ value }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card-wrap">
+            <a href="{{ last_offer.link }}" target="_blank">
+              <img src="{{ last_offer.image.url }}" alt="{{ last_offer.title }}" class="banner"/>
+            </a>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row row-cols-4">
+      {% for tank in tanks %}
+        <div class="col">
+          <div class="card-wrap">
+            <a href="{% url 'users:hangar-detail' tank.id %}" class="card-top" style="background-image: url('{% if tank.image %}{{ tank.image.url }}{% endif %}');">
+              <div>
+                <span class="tank-id"># {{ tank.id }}</span>
+                <span class="tank-type">{{ tank.type }}</span>
+              </div>
+            </a>
+            <div class="card-bottom">
+              <div class="card-bottom-1">
+                <div class="tank-name">{{ tank.name }}</div>
+                <div class="small-text">{{ tank.type }}</div>
+              </div>
+              <div class="card-bottom-2">
+                <img src="{% static 'images/cart-btn.png' %}" alt="cart"
+                  onclick="tank_action({{ tank.id }}, {% if tank.has_nft %}true{% else %}false{% endif %}, '{{ tank.nft_meta_url }}')"
+                >
+                <div class="tank-price">
+                  <img src="{% static 'images/price-icon.png' %}" style="margin-right: 8px;" alt="">
+                  {{ tank.price|truncate_trailing_zeroes }} BNB
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block modal %}
+  {{ block.super }}
+  {% include 'includes/hangar_modals.html' %}
+{% endblock %}
+
+{% block inline_javascript %}
+  <script>
+    set_account().then(result => {
+      getChainId().then(result => {
+        if (result !== '{{ global_settings.active_network.chain_id }}') {
+          setNetwork().then(result => {console.log(result)});
+        }
+      });
+    }).catch(err => {console.log(err)});
+  </script>
+  {% include 'includes/hangar_script.html' %}
+{% endblock inline_javascript %}

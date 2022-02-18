@@ -12,7 +12,7 @@ urlpatterns = [
     path("marketplace/", include("battle_of_chains.market.urls", namespace="market")),
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
-    path("users/", include("battle_of_chains.users.urls", namespace="users")),
+    path("user/", include("battle_of_chains.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     path("test/", include("battle_of_chains.socketio_server.urls"))
     # Your stuff: custom urls includes go here

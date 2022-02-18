@@ -21,7 +21,9 @@ class MarketPlaceView(TemplateView):
         )
         tanks = Tank.objects.filter(
             Q(for_sale=True, basic_free_tank=False) | Q(basic_free_tank=True, offer__is_active=True)
-        ).annotate(primary=F('offer__is_active'), price_actual=price_field).order_by(context['order_by'])
+        ).select_related('nft', 'type', 'offer').annotate(
+            primary=F('offer__is_active'), price_actual=price_field
+        ).order_by(context['order_by'])
         context['type_filter'] = TankType.objects.values_list('id', 'name')
         paginator = Paginator(tanks, battle_settings.tanks_per_page)
         context['paginator'] = paginator
@@ -29,6 +31,11 @@ class MarketPlaceView(TemplateView):
         maxes = [Max(prop) for prop in ('level', 'moving_price', 'overlook', 'armor', 'hp')]
         range_filters = Tank.objects.aggregate(*maxes)
         context['range_filters'] = {k.split('__')[0]: v for k, v in range_filters.items()}
+        context['bought_offers'] = []
+        if self.request.user.is_authenticated:
+            bought_offers = Tank.objects.filter(owner=self.request.user, origin_offer__isnull=False)\
+                .values_list('origin_offer_id', 'id')
+            context['bought_offers'] = dict(bought_offers)
         return context
 
 

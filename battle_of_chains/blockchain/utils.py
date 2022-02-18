@@ -21,6 +21,15 @@ class MintException(Exception):
     pass
 
 
+def get_w3_provider() -> Web3:
+    owner = settings.CONTRACTS_OWNER
+    global_settings = BattleSettings.get_solo()
+    w3 = Web3(Web3.HTTPProvider(global_settings.active_network.rpc_url, request_kwargs={'timeout': 60}))
+    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    w3.eth.defaultAccount = owner['address']
+    return w3
+
+
 def send_transaction(w3, txn, owner_address, owner_secret):
     gas = txn.estimateGas()
     txn = txn.buildTransaction(
@@ -208,3 +217,7 @@ class SmartContract:
             if len(processed_logs) == 1:
                 entry = processed_logs[0]
                 self.process_log_entry(entry, event)
+
+    def get_user_balance(self, address):
+        address = self.w3.toChecksumAddress(address)
+        return self.smart_contract.functions.balanceOf(address).call()
