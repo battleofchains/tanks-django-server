@@ -53,3 +53,6 @@ celery-logs:
 
 npm-build:
 	$(DJANGO) npm run build
+
+npm-install:
+	$(DJANGO) npm i
