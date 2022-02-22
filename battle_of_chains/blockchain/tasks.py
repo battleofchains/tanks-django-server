@@ -20,10 +20,9 @@ def deploy_smart_contract_task(self, contract_id):
 
     try:
         contract = Contract.objects.get(id=contract_id)
-        smart_contract = SmartContract(contract)
-        smart_contract.deploy()
+        SmartContract(contract)
     except Exception as e:
-        logger.error(f'Cannot deploy contract {contract_id}. Error: {e}')
+        logger.exception(f'Cannot deploy contract {contract_id}. Error: {e}')
     finally:
         cache.delete(self.name)
 

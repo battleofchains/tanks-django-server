@@ -11,6 +11,7 @@ uvicorn[standard]==0.15.0  # https://github.com/encode/uvicorn
 python-socketio==5.5.0  # https://github.com/miguelgrinberg/python-socketio
 python-logstash==0.4.6  # https://github.com/vklochan/python-logstash
 web3==5.26.0  # https://github.com/ethereum/web3.py
+eth_abi==2.1.1  # https://github.com/ethereum/eth-abi
 
 # Django
 # ------------------------------------------------------------------------------

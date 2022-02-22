@@ -1,10 +1,13 @@
 import logging
+from datetime import datetime
 from urllib.parse import urljoin
 
+import eth_abi
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Max
 from django.urls import reverse
+from eth_account.messages import encode_defunct
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
@@ -140,9 +143,12 @@ class SmartContract:
         self.owner = settings.CONTRACTS_OWNER
         self.contract = contract
         self.w3 = self._get_w3_provider()
-        self.smart_contract = self.w3.eth.contract(
-            abi=contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(contract.address)
-        )
+        if contract.address:
+            self.smart_contract = self.w3.eth.contract(
+                abi=contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(contract.address)
+            )
+        else:
+            self.deploy()
 
     def _get_w3_provider(self) -> Web3:
         w3 = Web3(Web3.HTTPProvider(self.contract.network.rpc_url, request_kwargs={'timeout': 60}))
@@ -168,15 +174,20 @@ class SmartContract:
                 self.contract.save()
                 logger.info(f'Contract is deployed at {contract_address}')
                 logger.info(tx_receipt)
+                self.smart_contract = self.w3.eth.contract(
+                    abi=self.contract.contract_definitions['abi'], address=self.w3.toChecksumAddress(contract_address)
+                )
         else:
             logger.debug(f'Contract already deployed at {self.contract.address}')
 
     def mint_nft(self, tank):
+        ts = int(datetime.now().timestamp() * 10e6)
         address_to = self.w3.toChecksumAddress(tank.owner.wallet.address)
         price = self.w3.toWei(tank.price, 'ether')
         meta_url = reverse('api:nft_meta-detail', args=[tank.id])
         meta_url = urljoin(settings.SITE_URL, meta_url)
-        txn = self.smart_contract.functions.mint(tank.id, meta_url, address_to, price)
+        sig = self.generate_signature(address_to, tank.id, ts)
+        txn = self.smart_contract.functions.mint(tank.id, meta_url, address_to, price, ts, sig)
         tx_receipt = send_transaction(
             self.w3, txn, self.w3.toChecksumAddress(self.owner['address']), self.owner['secret']
         )
@@ -221,3 +232,9 @@ class SmartContract:
     def get_user_balance(self, address):
         address = self.w3.toChecksumAddress(address)
         return self.smart_contract.functions.balanceOf(address).call()
+
+    def generate_signature(self, receiver, token_id, ts):
+        abi_encoded = eth_abi.encode_abi(['address', 'uint256', 'uint256'], [receiver, token_id, ts])
+        hash_ = Web3.keccak(abi_encoded)
+        sig = self.w3.eth.account.sign_message(encode_defunct(hash_), private_key=self.owner['secret'])
+        return sig.signature.hex()

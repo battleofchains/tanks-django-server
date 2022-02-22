@@ -20,6 +20,7 @@ class WalletAdmin(AdminNoChangeMixin, admin.ModelAdmin):
 class ContractAdmin(admin.ModelAdmin):
     list_display = ('name', 'symbol', 'contract_url', 'network', 'is_active')
     actions = ('deploy_contracts',)
+    readonly_fields = ('address',)
 
     def deploy_contracts(self, request, queryset):
         for obj in queryset:
